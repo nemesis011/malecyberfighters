@@ -66,6 +66,16 @@ window.updateProfileCard = function(user) {
   }
 };
 
+// Update UI based on session state (placeholder for existing updateUIForSession)
+window.updateUIForSession = function() {
+  const user = getSession();
+  if (user) {
+    updateProfileCard(user);
+  } else {
+    updateProfileCard(null);
+  }
+};
+
 // Check if user is logged in on page load
 window.addEventListener('load', function() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
