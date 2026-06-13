@@ -1,5 +1,4 @@
 $('btnLogin').addEventListener('click', () => show($('modalLogin')));
-$('ctaLogin').addEventListener('click', () => show($('modalLogin')));
 $('loginCancel').addEventListener('click', () => hide($('modalLogin')));
 $('loginSubmit').addEventListener('click', doLogin);
 $('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
@@ -31,9 +30,11 @@ async function doLogin(){
     }
 
     setSession(data.user);
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
     socket.emit('login', data.user);
     hide($('modalLogin'));
     updateUIForSession();
+    updateProfileCard(data.user);
 
   } catch(e){
     err.textContent = "Network error";
@@ -43,5 +44,7 @@ async function doLogin(){
 
 function logout(){
   clearSession();
+  localStorage.removeItem('currentUser');
   updateUIForSession();
+  updateProfileCard(null);
 }
