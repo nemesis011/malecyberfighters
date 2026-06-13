@@ -1,9 +1,4 @@
-// Store PM history in memory
 window._pmStore = window._pmStore || {};
-
-function pmKey(a, b) {
-  return [a, b].sort().join("::");
-}
 
 function openPrivateWindow(targetUsername) {
   const s = getSession();
@@ -16,8 +11,11 @@ function openPrivateWindow(targetUsername) {
     return;
   }
 
-  // Prevent duplicate windows
-  if (document.getElementById("pmWindow_" + targetUsername)) return;
+  if (document.getElementById("pmWindow_" + targetUsername)) {
+    clearUnread(targetUsername);
+    if (window.updateDMListSidebar) updateDMListSidebar();
+    return;
+  }
 
   const target = (window.users || []).find(u => u.username === targetUsername) || {
     username: targetUsername,
@@ -37,7 +35,10 @@ function openPrivateWindow(targetUsername) {
           <div class="small">@${target.username}</div>
         </div>
       </div>
-      <button class="small-btn pm-close">X</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="small-btn pm-clear">Clear</button>
+        <button class="small-btn pm-close">X</button>
+      </div>
     </div>
 
     <div class="pm-body" id="pmBody_${target.username}"></div>
@@ -50,22 +51,35 @@ function openPrivateWindow(targetUsername) {
 
   document.body.appendChild(pm);
 
-  // Close button
   pm.querySelector(".pm-close").addEventListener("click", () => {
     pm.remove();
   });
 
-  // Send button
+  pm.querySelector(".pm-clear").addEventListener("click", () => {
+    if (!confirm("Clear this DM history?")) return;
+    const key = pmKey(s.username, target.username);
+    localStorage.removeItem(STORAGE_DM_PREFIX + key);
+    clearUnread(target.username);
+    window._pmStore[key] = [];
+    renderPM(target.username);
+    if (window.updateDMListSidebar) updateDMListSidebar();
+  });
+
   document
     .getElementById("pmSend_" + target.username)
     .addEventListener("click", () => sendPM(target.username));
 
-  // Enter key
   document
     .getElementById("pmInput_" + target.username)
     .addEventListener("keydown", e => {
       if (e.key === "Enter") sendPM(target.username);
     });
+
+  const key = pmKey(s.username, target.username);
+  window._pmStore[key] = loadDM(s.username, target.username);
+
+  clearUnread(target.username);
+  if (window.updateDMListSidebar) updateDMListSidebar();
 
   renderPM(target.username);
 }
@@ -81,13 +95,16 @@ function sendPM(targetUsername) {
   const message = {
     from: s.username,
     to: targetUsername,
-    display: s.display,
+    display: s.display || s.displayName || s.username,
     text
   };
 
   const key = pmKey(s.username, targetUsername);
-  window._pmStore[key] = window._pmStore[key] || [];
-  window._pmStore[key].push(message);
+  let arr = loadDM(s.username, targetUsername);
+  arr.push(message);
+  saveDM(s.username, targetUsername, arr);
+
+  window._pmStore[key] = arr;
 
   socket.emit("privateMessage", message);
 
@@ -99,13 +116,11 @@ function renderPM(targetUsername) {
   const s = getSession();
   if (!s) return;
 
-  const key = pmKey(s.username, targetUsername);
   const body = document.getElementById("pmBody_" + targetUsername);
   if (!body) return;
 
+  const msgs = loadDM(s.username, targetUsername);
   body.innerHTML = "";
-
-  const msgs = window._pmStore[key] || [];
 
   msgs.forEach(m => {
     const div = document.createElement("div");
@@ -118,4 +133,65 @@ function renderPM(targetUsername) {
   });
 
   body.scrollTop = body.scrollHeight;
+}
+
+// DM sidebar + search
+
+function updateDMListSidebar() {
+  const sidebar = document.getElementById("dmSidebar");
+  if (!sidebar) return;
+
+  const user = getSession();
+  if (!user) {
+    sidebar.innerHTML = '<div class="small" style="color:var(--muted)">Login to see DMs</div>';
+    return;
+  }
+
+  const unread = getUnreadMap();
+  const keys = Object.keys(localStorage)
+    .filter(k => k.startsWith(STORAGE_DM_PREFIX))
+    .map(k => k.replace(STORAGE_DM_PREFIX, ''));
+
+  sidebar.innerHTML = '';
+
+  const search = document.createElement('input');
+  search.id = 'dmSearch';
+  search.className = 'dm-search';
+  search.placeholder = 'Search DMs';
+  sidebar.appendChild(search);
+
+  const listContainer = document.createElement('div');
+  listContainer.id = 'dmSidebarList';
+  sidebar.appendChild(listContainer);
+
+  const renderList = (filterTerm = '') => {
+    listContainer.innerHTML = '';
+    keys.forEach(key => {
+      const [a, b] = key.split('::');
+      const me = user.username;
+      const other = a === me ? b : a;
+      if (!other) return;
+
+      if (filterTerm && !other.toLowerCase().includes(filterTerm.toLowerCase())) return;
+
+      const item = document.createElement('div');
+      item.className = 'dm-sidebar-item';
+      item.innerHTML = `
+        <span>@${other}</span>
+        ${unread[other] ? `<span class="dm-unread-badge">${unread[other]}</span>` : ''}
+      `;
+      item.addEventListener('click', () => openPrivateWindow(other));
+      listContainer.appendChild(item);
+    });
+
+    if (!listContainer.innerHTML) {
+      listContainer.innerHTML = '<div class="small" style="color:var(--muted)">No DMs yet</div>';
+    }
+  };
+
+  renderList();
+
+  search.addEventListener('input', e => {
+    renderList(e.target.value.trim());
+  });
 }
