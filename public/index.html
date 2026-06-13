@@ -75,7 +75,90 @@ button.ghost{
 
 .hero{min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 
-.cta-row{display:flex;gap:10px}
+.user-profile-card{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px;
+  background:linear-gradient(180deg, rgba(127,216,255,0.08), rgba(160,200,255,0.04));
+  border:1px solid rgba(127,216,255,0.2);
+  border-radius:10px;
+  align-items:center;
+  text-align:center;
+}
+
+.user-profile-card.logged-in{
+  flex-direction:row;
+  align-items:center;
+  text-align:left;
+}
+
+.profile-avatar{
+  width:56px;
+  height:56px;
+  border-radius:8px;
+  background:linear-gradient(135deg,#1a2233,#0d1320);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#dff6ff;
+  font-weight:700;
+  border:1px solid rgba(160,200,255,0.25);
+  font-size:24px;
+  flex-shrink:0;
+}
+
+.profile-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  flex:1;
+}
+
+.profile-name{
+  font-weight:600;
+  font-size:16px;
+  color:#e9f6ff;
+}
+
+.profile-status{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.profile-stats{
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  margin-top:8px;
+}
+
+.profile-stat{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.profile-stat-value{
+  font-weight:600;
+  color:var(--accent);
+}
+
+.profile-stat-label{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.profile-logout{
+  margin-top:8px;
+  padding:6px 12px;
+  font-size:12px;
+  display:none;
+}
+
+.user-profile-card.logged-in .profile-logout{
+  display:block;
+}
 
 .muted{color:var(--muted);font-size:13px}
 
@@ -281,9 +364,9 @@ body::after {
     <div class="card hero">
       <h2>Welcome to the Arena</h2>
       <p class="muted">Create a profile, see who is online, and start public or private matches in the chatroom.</p>
-      <div class="cta-row">
-        <button id="ctaLogin">Login</button>
-        <button id="ctaRegister" class="ghost">Register</button>
+      <div class="user-profile-card" id="userProfileCard">
+        <div style="font-size:14px;color:var(--muted)">🔒 Not logged in</div>
+        <p style="margin:8px 0 0 0;color:var(--muted);font-size:12px">Login or register to see your profile</p>
       </div>
       <div style="margin-top:12px" class="muted">Demo stack: Node, MongoDB, Socket.IO, Admin, Analytics.</div>
     </div>
@@ -446,6 +529,61 @@ body::after {
 <script src="/js/admin.js"></script>
 <script src="/js/analytics.js"></script>
 <script src="/js/app.js"></script>
+
+<script>
+// User profile card management
+window.updateProfileCard = function(user) {
+  const card = document.getElementById('userProfileCard');
+  if (!user) {
+    card.innerHTML = '<div style="font-size:14px;color:var(--muted)">🔒 Not logged in</div><p style="margin:8px 0 0 0;color:var(--muted);font-size:12px">Login or register to see your profile</p>';
+    card.classList.remove('logged-in');
+  } else {
+    const initials = (user.displayName || user.username).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const wins = user.wins || 0;
+    const losses = user.losses || 0;
+    const winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(0) : '0';
+    
+    card.innerHTML = `
+      <div class="profile-avatar">${initials}</div>
+      <div class="profile-info">
+        <div class="profile-name">${user.displayName || user.username}</div>
+        <div class="profile-status">@${user.username}</div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="profile-stat-value">${wins}</div>
+            <div class="profile-stat-label">Wins</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">${losses}</div>
+            <div class="profile-stat-label">Losses</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">${winRate}%</div>
+            <div class="profile-stat-label">Win Rate</div>
+          </div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="profile-logout ghost">Logout</button>
+    `;
+    card.classList.add('logged-in');
+    
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function() {
+        window.logout();
+      });
+    }
+  }
+};
+
+// Check if user is logged in on page load
+window.addEventListener('load', function() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (currentUser) {
+    window.updateProfileCard(currentUser);
+  }
+});
+</script>
 
 </body>
 </html>
