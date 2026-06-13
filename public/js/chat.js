@@ -10,7 +10,7 @@ $('publicMessage').addEventListener('keydown', e => { if(e.key === 'Enter') send
 
 function openChat(){
   show($('chatPopup'));
-  updateUIForSession();
+  if (window.updateUIForSession) updateUIForSession();
   renderPublicFeed();
   renderOnlineList();
 }
@@ -22,7 +22,7 @@ function sendPublicMessage(){
   const s = getSession();
   const msg = {
     from: s ? s.username : 'guest',
-    display: s ? s.display : 'Guest',
+    display: s ? (s.display || s.displayName || s.username) : 'Guest',
     text: txt
   };
 
@@ -32,6 +32,7 @@ function sendPublicMessage(){
 
 function renderPublicFeed(){
   const feed = $('publicFeed');
+  if (!feed) return;
   feed.innerHTML = '';
 
   const messages = loadPublic();
@@ -55,6 +56,7 @@ function renderPublicFeed(){
 
 function renderQuickRoster(){
   const el = $('quickRoster');
+  if (!el) return;
   el.innerHTML = '';
   (window.users || []).slice(0,6).forEach(u => {
     const div = document.createElement('div');
@@ -73,6 +75,7 @@ function renderQuickRoster(){
 
 function renderRosterPage(){
   const el = $('rosterPage');
+  if (!el) return;
   el.innerHTML = '';
   (window.users || []).forEach(u => {
     const row = document.createElement('div');
@@ -98,6 +101,7 @@ function renderRosterPage(){
 
 function renderOnlineList(){
   const el = $('onlineList');
+  if (!el) return;
   el.innerHTML = '';
   (window.users || []).forEach(u => {
     const row = document.createElement('div');
