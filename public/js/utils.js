@@ -10,7 +10,9 @@ function escapeHtml(s){
 }
 
 const STORAGE_SESSION = 'cw_session_v1';
-const STORAGE_PUBLIC = 'cw_public_v1';
+const STORAGE_PUBLIC  = 'cw_public_v1';
+const STORAGE_DM_PREFIX = 'cw_dm_';
+const STORAGE_DM_UNREAD = 'cw_dm_unread';
 
 function setSession(user){ localStorage.setItem(STORAGE_SESSION, JSON.stringify(user)); }
 function getSession(){ return JSON.parse(localStorage.getItem(STORAGE_SESSION) || 'null'); }
@@ -19,16 +21,53 @@ function clearSession(){ localStorage.removeItem(STORAGE_SESSION); }
 function loadPublic(){ return JSON.parse(localStorage.getItem(STORAGE_PUBLIC) || '[]'); }
 function savePublic(arr){ localStorage.setItem(STORAGE_PUBLIC, JSON.stringify(arr)); }
 
+// DM storage helpers
+function pmKey(a, b) {
+  return [a, b].sort().join('::');
+}
+
+function loadDM(a, b) {
+  const key = pmKey(a, b);
+  return JSON.parse(localStorage.getItem(STORAGE_DM_PREFIX + key) || '[]');
+}
+
+function saveDM(a, b, arr) {
+  const key = pmKey(a, b);
+  localStorage.setItem(STORAGE_DM_PREFIX + key, JSON.stringify(arr));
+}
+
+// Unread DM helpers
+function getUnreadMap() {
+  return JSON.parse(localStorage.getItem(STORAGE_DM_UNREAD) || '{}');
+}
+
+function saveUnreadMap(map) {
+  localStorage.setItem(STORAGE_DM_UNREAD, JSON.stringify(map));
+}
+
+function incrementUnread(fromUser) {
+  const map = getUnreadMap();
+  map[fromUser] = (map[fromUser] || 0) + 1;
+  saveUnreadMap(map);
+}
+
+function clearUnread(user) {
+  const map = getUnreadMap();
+  delete map[user];
+  saveUnreadMap(map);
+}
+
 // User profile card management
 window.updateProfileCard = function(user) {
   const card = document.getElementById('userProfileCard');
-  if (!card) return; // Card might not exist yet
+  if (!card) return;
   
   if (!user) {
     card.innerHTML = '<div style="font-size:14px;color:var(--muted)">🔒 Not logged in</div><p style="margin:8px 0 0 0;color:var(--muted);font-size:12px">Login or register to see your profile</p>';
     card.classList.remove('logged-in');
   } else {
-    const initials = (user.displayName || user.username).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const displayName = user.display || user.displayName || user.username;
+    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     const wins = (user.stats && user.stats.wins) || 0;
     const losses = (user.stats && user.stats.losses) || 0;
     const winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(0) : '0';
@@ -38,7 +77,7 @@ window.updateProfileCard = function(user) {
     card.innerHTML = `
       <div class="profile-avatar">${initials}</div>
       <div class="profile-info">
-        <div class="profile-name">${user.displayName || user.username}</div>
+        <div class="profile-name">${displayName}</div>
         <div class="profile-status">@${user.username}</div>
         <div class="profile-details">
           <div class="profile-age">${age}</div>
@@ -72,7 +111,6 @@ window.updateProfileCard = function(user) {
   }
 };
 
-// Update UI based on session state (placeholder for existing updateUIForSession)
 window.updateUIForSession = function() {
   const user = getSession();
   if (user) {
@@ -82,10 +120,11 @@ window.updateUIForSession = function() {
   }
 };
 
-// Check if user is logged in on page load
 window.addEventListener('load', function() {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   if (currentUser) {
     window.updateProfileCard(currentUser);
+  } else {
+    window.updateProfileCard(null);
   }
 });
