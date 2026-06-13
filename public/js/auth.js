@@ -35,10 +35,11 @@ async function doLogin(){
     hide($('modalLogin'));
     if (window.updateUIForSession) updateUIForSession();
     if (window.updateProfileCard) updateProfileCard(data.user);
-    
-    // Clear login form
+
     $('loginUser').value = '';
     $('loginPass').value = '';
+
+    if (window.updateDMListSidebar) updateDMListSidebar();
 
   } catch(e){
     err.textContent = "Network error";
@@ -51,4 +52,5 @@ function logout(){
   localStorage.removeItem('currentUser');
   if (window.updateUIForSession) updateUIForSession();
   if (window.updateProfileCard) updateProfileCard(null);
+  if (window.updateDMListSidebar) updateDMListSidebar();
 }
