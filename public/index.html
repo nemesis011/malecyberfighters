@@ -89,7 +89,7 @@ button.ghost{
 
 .user-profile-card.logged-in{
   flex-direction:row;
-  align-items:center;
+  align-items:flex-start;
   text-align:left;
 }
 
@@ -111,7 +111,7 @@ button.ghost{
 .profile-info{
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:6px;
   flex:1;
 }
 
@@ -119,24 +119,50 @@ button.ghost{
   font-weight:600;
   font-size:16px;
   color:#e9f6ff;
+  margin:0;
 }
 
 .profile-status{
   font-size:12px;
   color:var(--muted);
+  margin:0;
+}
+
+.profile-details{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:8px 0;
+  border-top:1px solid rgba(127,216,255,0.1);
+  border-bottom:1px solid rgba(127,216,255,0.1);
+  margin-bottom:8px;
+}
+
+.profile-age{
+  font-size:12px;
+  color:var(--accent);
+  font-weight:500;
+}
+
+.profile-bio{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.4;
+  max-width:200px;
+  word-wrap:break-word;
 }
 
 .profile-stats{
   display:flex;
   gap:16px;
   font-size:12px;
-  margin-top:8px;
 }
 
 .profile-stat{
   display:flex;
   flex-direction:column;
   gap:2px;
+  align-items:center;
 }
 
 .profile-stat-value{
@@ -146,14 +172,16 @@ button.ghost{
 
 .profile-stat-label{
   color:var(--muted);
-  font-size:11px;
+  font-size:10px;
 }
 
 .profile-logout{
-  margin-top:8px;
+  margin-left:auto;
+  margin-top:0;
   padding:6px 12px;
   font-size:12px;
   display:none;
+  flex-shrink:0;
 }
 
 .user-profile-card.logged-in .profile-logout{
@@ -290,6 +318,14 @@ footer{
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
   .chat-popup{right:12px;left:12px;width:auto}
+  .user-profile-card.logged-in{
+    flex-direction:column;
+    align-items:center;
+  }
+  .profile-logout{
+    margin-left:0;
+    margin-top:8px;
+  }
 }
 
 body::after {
@@ -529,61 +565,6 @@ body::after {
 <script src="/js/admin.js"></script>
 <script src="/js/analytics.js"></script>
 <script src="/js/app.js"></script>
-
-<script>
-// User profile card management
-window.updateProfileCard = function(user) {
-  const card = document.getElementById('userProfileCard');
-  if (!user) {
-    card.innerHTML = '<div style="font-size:14px;color:var(--muted)">🔒 Not logged in</div><p style="margin:8px 0 0 0;color:var(--muted);font-size:12px">Login or register to see your profile</p>';
-    card.classList.remove('logged-in');
-  } else {
-    const initials = (user.displayName || user.username).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const wins = user.wins || 0;
-    const losses = user.losses || 0;
-    const winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(0) : '0';
-    
-    card.innerHTML = `
-      <div class="profile-avatar">${initials}</div>
-      <div class="profile-info">
-        <div class="profile-name">${user.displayName || user.username}</div>
-        <div class="profile-status">@${user.username}</div>
-        <div class="profile-stats">
-          <div class="profile-stat">
-            <div class="profile-stat-value">${wins}</div>
-            <div class="profile-stat-label">Wins</div>
-          </div>
-          <div class="profile-stat">
-            <div class="profile-stat-value">${losses}</div>
-            <div class="profile-stat-label">Losses</div>
-          </div>
-          <div class="profile-stat">
-            <div class="profile-stat-value">${winRate}%</div>
-            <div class="profile-stat-label">Win Rate</div>
-          </div>
-        </div>
-      </div>
-      <button id="logoutBtn" class="profile-logout ghost">Logout</button>
-    `;
-    card.classList.add('logged-in');
-    
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function() {
-        window.logout();
-      });
-    }
-  }
-};
-
-// Check if user is logged in on page load
-window.addEventListener('load', function() {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (currentUser) {
-    window.updateProfileCard(currentUser);
-  }
-});
-</script>
 
 </body>
 </html>
