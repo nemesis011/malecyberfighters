@@ -231,7 +231,10 @@ app.post('/api/login', async (req, res) => {
         imageUrl: user.imageUrl,
         color: user.color,
         language: user.language,
-        role: user.role
+        role: user.role,
+        stats: user.stats,
+        info: user.info,
+        age: user.age
       }
     });
   } catch (e) {
