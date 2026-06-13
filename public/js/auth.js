@@ -33,8 +33,12 @@ async function doLogin(){
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     socket.emit('login', data.user);
     hide($('modalLogin'));
-    updateUIForSession();
-    updateProfileCard(data.user);
+    if (window.updateUIForSession) updateUIForSession();
+    if (window.updateProfileCard) updateProfileCard(data.user);
+    
+    // Clear login form
+    $('loginUser').value = '';
+    $('loginPass').value = '';
 
   } catch(e){
     err.textContent = "Network error";
@@ -45,6 +49,6 @@ async function doLogin(){
 function logout(){
   clearSession();
   localStorage.removeItem('currentUser');
-  updateUIForSession();
-  updateProfileCard(null);
+  if (window.updateUIForSession) updateUIForSession();
+  if (window.updateProfileCard) updateProfileCard(null);
 }
