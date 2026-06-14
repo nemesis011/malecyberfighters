@@ -474,6 +474,8 @@ table tr:hover {
     <div class="user-profile-card" id="userProfileCard">
       <div>🔒 Not logged in</div>
       <p>Login or register to see your profile</p>
+      <button id="btnEditProfile" class="ghost">Edit Profile</button>
+
     </div>
 
   </div>
@@ -498,6 +500,55 @@ table tr:hover {
     <div>
       <button id="loginCancel" class="ghost">Cancel</button>
       <button id="loginSubmit">Login</button>
+    </div>
+  </div>
+</div>
+
+  <!-- UPDATE MODAL -->
+  <div id="modalEditProfile" style="display:none;position:fixed;inset:0;">
+  <div style="padding:20px;width:480px;margin:auto;background:#111;border-radius:10px;max-height:90vh;overflow:auto">
+
+    <h3>Edit Profile</h3>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      <input id="editDisplay" type="text" placeholder="Display name">
+      <input id="editAge" type="number" min="13" placeholder="Age">
+
+      <textarea id="editInfo" rows="3" placeholder="Bio"></textarea>
+
+      <div>
+        <label>Favorite Color</label>
+        <input id="editColor" type="color">
+      </div>
+
+      <div>
+        <label>Language</label>
+        <select id="editLanguage">
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <input id="editWins" type="number" placeholder="Wins">
+        <input id="editLosses" type="number" placeholder="Losses">
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="editImageFile" type="file" accept="image/*">
+        <button id="btnEditUploadImage" class="small-btn">Upload Image</button>
+        <div id="editUploadStatus">No image uploaded</div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button id="editCancel" class="ghost">Cancel</button>
+        <button id="editSubmit">Save Changes</button>
+      </div>
+
+      <div id="editError" style="display:none;color:#ff6b6b"></div>
     </div>
   </div>
 </div>
