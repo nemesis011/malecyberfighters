@@ -552,6 +552,20 @@ table tr:hover {
     </div>
   </div>
 </div>
+<div id="modalAdminPassword" style="display:none;position:fixed;inset:0;">
+  <div style="padding:20px;width:360px;margin:auto;background:#111;border-radius:10px;">
+    <h3>Admin Login</h3>
+
+    <input id="adminPasswordInput" type="password" placeholder="Enter admin password" style="width:100%;margin-bottom:10px">
+
+    <div id="adminPasswordError" style="display:none;color:#ff6b6b;margin-bottom:10px"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button id="adminPasswordCancel" class="ghost">Cancel</button>
+      <button id="adminPasswordSubmit">Enter</button>
+    </div>
+  </div>
+</div>
 
 <!-- REGISTER MODAL -->
 <div id="modalRegister" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);align-items:center;justify-content:center">
