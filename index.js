@@ -118,6 +118,36 @@ const IpLog = mongoose.model('IpLog', ipLogSchema);
 // ---------- HELPERS ----------
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
+const DISCORD_WEBHOOK_URL = process.env.Discord_webhook || null;
+const DISCORD_SUPPORT_URL = process.env.Discord_Support || null;
+
+async function sendDiscordWebhookMessage(username, message, avatarUrl) {
+  if (!DISCORD_WEBHOOK_URL) {
+    console.warn("Discord webhook URL not configured.");
+    return;
+  }
+
+  const payload = {
+    username: username || "Chat Message",
+    content: message,
+    avatar_url: avatarUrl || "",
+  };
+
+  try {
+    const response = await fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to send webhook:", response.statusText);
+    }
+  } catch (err) {
+    console.error("Error sending webhook:", err);
+  }
+}
+
 function getIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
 }
@@ -412,9 +442,28 @@ io.on('connection', (socket) => {
     io.emit('presence', onlineUsers);
   });
 
-  socket.on('publicMessage', async (msg) => {
-    io.emit('publicMessage', { ...msg, time: new Date().toISOString() });
-  });
+socket.on('publicMessage', async (msg) => {
+  const enriched = { ...msg, time: new Date().toISOString() };
+
+  // Broadcast to all clients
+  io.emit('publicMessage', enriched);
+
+  // Lookup avatar for Discord webhook
+  try {
+    const user = await User.findOne({ username: msg.from }).lean();
+    const avatarUrl = user?.imageUrl || null;
+
+    // Send to Discord
+    await sendDiscordWebhookMessage(
+      msg.display || msg.from,
+      msg.text,
+      avatarUrl
+    );
+  } catch (err) {
+    console.error("Discord webhook error:", err);
+  }
+});
+
 
   socket.on('privateMessage', async (pm) => {
     const targetSocket = onlineByUsername.get(pm.to);
