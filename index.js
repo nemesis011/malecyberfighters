@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { FormData } = require('undici');
+const FormData = require('form-data');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -131,7 +131,8 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
 
     const resp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
       method: "POST",
-      body: form
+      body: form,
+      headers: form.getHeaders()
     });
 
     const data = await resp.json();
