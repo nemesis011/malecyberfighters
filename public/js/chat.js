@@ -1,3 +1,7 @@
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let dragging = false;
+
 $('btnOpenChat').addEventListener('click', openChat);
 $('btnCloseChat').addEventListener('click', () => hide($('chatPopup')));
 $('btnMinimize').addEventListener('click', () => {
@@ -129,6 +133,35 @@ function renderRosterPage() {
     b.addEventListener('click', e => openPrivateWindow(e.target.dataset.user));
   });
 }
+
+(function enableChatDrag() {
+  const popup = $('chatPopup');
+  const header = popup.querySelector('.chat-header');
+
+  header.addEventListener('mousedown', (e) => {
+    dragging = true;
+
+    const rect = popup.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    popup.style.transition = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+
+    popup.style.left = (e.clientX - dragOffsetX) + 'px';
+    popup.style.top = (e.clientY - dragOffsetY) + 'px';
+    popup.style.right = 'auto';
+    popup.style.bottom = 'auto';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    popup.style.transition = '';
+  });
+})();
 
 /* -----------------------------------------------------------
    ONLINE LIST (CHAT SIDEBAR)
