@@ -1,27 +1,27 @@
 /* -----------------------------------------------------------
-   ADMIN PANEL PASSWORD GATE
+   ADMIN PANEL PASSWORD AUTH (CSP-SAFE)
 ----------------------------------------------------------- */
 
-let adminSessionKey = null;
+window.adminSessionKey = null;
 
-/* When user clicks Admin Panel button */
+/* Open Admin Password Modal */
 document.getElementById("btnAdmin").addEventListener("click", () => {
-  // If already authenticated, open admin panel immediately
-  if (adminSessionKey) {
-    loadAdminPanel();
+  if (window.adminSessionKey) {
+    // Already authenticated → open admin panel
+    if (window.loadAdminPanel) window.loadAdminPanel();
     return;
   }
 
-  // Otherwise show password modal
+  // Show password modal
   show(document.getElementById("modalAdminPassword"));
 });
 
-/* Cancel button */
+/* Cancel admin password modal */
 document.getElementById("adminPasswordCancel").addEventListener("click", () => {
   hide(document.getElementById("modalAdminPassword"));
 });
 
-/* Submit password */
+/* Submit admin password */
 document.getElementById("adminPasswordSubmit").addEventListener("click", async () => {
   const input = document.getElementById("adminPasswordInput").value.trim();
   const error = document.getElementById("adminPasswordError");
@@ -34,7 +34,7 @@ document.getElementById("adminPasswordSubmit").addEventListener("click", async (
     return;
   }
 
-  // Try hitting a protected admin endpoint
+  // Test password by calling a protected endpoint
   const resp = await fetch("/api/admin/users", {
     headers: { "x-admin-key": input }
   });
@@ -48,45 +48,15 @@ document.getElementById("adminPasswordSubmit").addEventListener("click", async (
   }
 
   // Password correct → store session key
-  adminSessionKey = input;
+  window.adminSessionKey = input;
 
   hide(document.getElementById("modalAdminPassword"));
 
   // Open admin panel
-  loadAdminPanel();
+  if (window.loadAdminPanel) window.loadAdminPanel();
 });
 
-/* Override loadAdminPanel to include adminSessionKey */
-window.loadAdminPanel = async function () {
-  const res = await fetch("/api/admin/users", {
-    headers: { "x-admin-key": adminSessionKey }
-  });
-
-  const data = await res.json();
-  if (!data.ok) {
-    alert("Admin access denied");
-    return;
-  }
-
-  const tbody = document.querySelector("#adminTable tbody");
-  tbody.innerHTML = "";
-
-  data.users.forEach(u => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${u.username}</td>
-      <td>${u.email}</td>
-      <td>${u.role}</td>
-      <td>${u.online ? "🟢" : "⚪"}</td>
-      <td>${u.banned ? "🚫" : "✔"}</td>
-      <td>
-        <button class="small-btn" onclick="adminBan('${u.username}', ${!u.banned})">${u.banned ? "Unban" : "Ban"}</button>
-        <button class="small-btn" onclick="adminResetPass('${u.username}')">Reset PW</button>
-        <button class="small-btn" onclick="adminDelete('${u.username}')">Delete</button>
-      </td>
-    `;
-    tbody.appendChild(row);
-  });
-
-  show(document.getElementById("modalAdmin"));
-};
+/* Close Admin Panel */
+document.getElementById("adminClose").addEventListener("click", () => {
+  hide(document.getElementById("modalAdmin"));
+});
