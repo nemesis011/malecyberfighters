@@ -470,6 +470,58 @@ table tr:hover {
     max-height:90vh;
     overflow:auto
   }
+
+  #roomsSidebar {
+  position: fixed;
+  top: 0;
+  right: -320px; /* hidden by default */
+  width: 300px;
+  height: 100vh;
+
+  background: rgba(160,200,255,0.06);
+  border-left: 1px solid rgba(160,200,255,0.15);
+  backdrop-filter: blur(12px);
+
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+
+  box-shadow: 0 0 25px rgba(127,216,255,0.25);
+  transition: right 0.35s ease;
+  z-index: 9999;
+}
+
+#roomsSidebar.open {
+  right: 0;
+}
+
+.rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-item {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(160,200,255,0.08);
+  border: 1px solid rgba(160,200,255,0.15);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.room-item:hover {
+  background: rgba(127,216,255,0.15);
+}
+
 </style>
 </head>
 
@@ -498,6 +550,7 @@ table tr:hover {
 
     <!-- NEW DM SIDEBAR BUTTON -->
     <button id="btnDMs" class="ghost">DMs</button>
+    <button id="btnRooms" class="ghost">Rooms</button>
 
     <button id="btnAdmin" class="ghost">Admin Panel</button>
   </div>
@@ -745,6 +798,14 @@ table tr:hover {
 
     <button id="adminClose" class="ghost">Close</button>
   </div>
+</div>
+<div id="roomsSidebar">
+  <div class="rooms-header">
+    <h3>Your Rooms</h3>
+    <button id="btnCreateRoom" class="small-btn">+ Create Room</button>
+  </div>
+
+  <div id="roomsList" class="rooms-list"></div>
 </div>
 
 <!-- JS FILES -->
