@@ -1,85 +1,115 @@
-let editImageUrl = '';
+/* -----------------------------------------------------------
+   PROFILE EDIT LOGIC
+----------------------------------------------------------- */
 
-document.getElementById("btnEditProfile").addEventListener("click", () => {
-  const user = getSession();
+let editImageUrl = "";
+
+/* Called by utils.js when user clicks Edit Profile */
+window.openEditProfileModal = function(user) {
   if (!user) return;
 
-  // Pre-fill fields
-  $('editDisplay').value = user.display || user.username;
-  $('editAge').value = user.age || '';
-  $('editInfo').value = user.info || '';
-  $('editColor').value = user.color || '#ffffff';
-  $('editLanguage').value = user.language || 'en';
-  $('editWins').value = user.stats?.wins || 0;
-  $('editLosses').value = user.stats?.losses || 0;
+  // Pre-fill modal fields
+  $("editDisplay").value = user.display || user.displayName || user.username;
+  $("editAge").value = user.age || "";
+  $("editInfo").value = user.info || "";
+  $("editColor").value = user.color || "#ffffff";
+  $("editLanguage").value = user.language || "en";
+  $("editWins").value = user.stats?.wins || 0;
+  $("editLosses").value = user.stats?.losses || 0;
 
-  editImageUrl = user.imageUrl || '';
+  editImageUrl = user.imageUrl || "";
 
-  show($('modalEditProfile'));
+  show($("modalEditProfile"));
+};
+
+/* Cancel button */
+$("editCancel").addEventListener("click", () => {
+  hide($("modalEditProfile"));
 });
 
-$('editCancel').addEventListener('click', () => hide($('modalEditProfile')));
+/* Upload new profile image */
+$("btnEditUploadImage").addEventListener("click", async () => {
+  const file = $("editImageFile").files[0];
+  const status = $("editUploadStatus");
 
-$('btnEditUploadImage').addEventListener('click', async () => {
-  const file = $('editImageFile').files[0];
-  const status = $('editUploadStatus');
   if (!file) {
-    status.textContent = 'Select a file first';
+    status.textContent = "Select a file first";
     return;
   }
 
   const form = new FormData();
-  form.append('image', file);
+  form.append("image", file);
 
-  status.textContent = 'Uploading...';
+  status.textContent = "Uploading...";
 
-  const resp = await fetch('/api/upload-image', { method: 'POST', body: form });
-  const data = await resp.json();
+  try {
+    const resp = await fetch("/api/upload-image", {
+      method: "POST",
+      body: form
+    });
 
-  if (data.ok) {
-    editImageUrl = data.url;
-    status.textContent = 'Uploaded';
-  } else {
-    status.textContent = 'Upload failed';
+    const data = await resp.json();
+
+    if (data.ok) {
+      editImageUrl = data.url;
+      status.textContent = "Uploaded";
+    } else {
+      status.textContent = "Upload failed";
+    }
+  } catch (e) {
+    console.error("Upload error", e);
+    status.textContent = "Upload error";
   }
 });
 
-$('editSubmit').addEventListener('click', async () => {
+/* Save profile changes */
+$("editSubmit").addEventListener("click", async () => {
   const user = getSession();
   if (!user) return;
 
   const updates = {
-    display: $('editDisplay').value.trim(),
-    age: Number($('editAge').value),
-    info: $('editInfo').value.trim(),
-    color: $('editColor').value,
-    language: $('editLanguage').value,
+    display: $("editDisplay").value.trim(),
+    age: Number($("editAge").value),
+    info: $("editInfo").value.trim(),
+    color: $("editColor").value,
+    language: $("editLanguage").value,
     stats: {
-      wins: Number($('editWins').value),
-      losses: Number($('editLosses').value)
+      wins: Number($("editWins").value),
+      losses: Number($("editLosses").value)
     },
     imageUrl: editImageUrl
   };
 
-  const resp = await fetch('/api/update-profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: user.username, updates })
-  });
+  try {
+    const resp = await fetch("/api/update-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: user.username,
+        updates
+      })
+    });
 
-  const data = await resp.json();
+    const data = await resp.json();
 
-  if (!data.ok) {
-    $('editError').textContent = data.error || 'Update failed';
-    $('editError').style.display = 'block';
-    return;
+    if (!data.ok) {
+      $("editError").textContent = data.error || "Update failed";
+      $("editError").style.display = "block";
+      return;
+    }
+
+    // Update session + localStorage
+    setSession(data.user);
+    localStorage.setItem("currentUser", JSON.stringify(data.user));
+
+    // Update UI
+    if (window.updateProfileCard) updateProfileCard(data.user);
+
+    hide($("modalEditProfile"));
+
+  } catch (e) {
+    console.error("Profile update error", e);
+    $("editError").textContent = "Server error";
+    $("editError").style.display = "block";
   }
-
-  // Update session + UI
-  setSession(data.user);
-  localStorage.setItem('currentUser', JSON.stringify(data.user));
-
-  if (window.updateProfileCard) updateProfileCard(data.user);
-
-  hide($('modalEditProfile'));
 });
