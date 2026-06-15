@@ -163,28 +163,30 @@ button.ghost{
 }
 
 /* DM SIDEBAR --------------------------------------------------------------- */
-#dmSidebar{
-  position:fixed;
-  left:-260px; /* hidden by default */
-  top:80px;
-  width:240px;
-  height:420px;
-  background:rgba(160,200,255,0.06);
-  border:1px solid rgba(160,200,255,0.15);
-  border-radius:10px;
-  backdrop-filter:blur(10px);
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  overflow-y:auto;
-  box-shadow:0 0 20px rgba(120,180,255,0.25);
-  transition:all 0.35s ease;
-  z-index:9999;
+#dmSidebar {
+  position: fixed;
+  top: 0;
+  left: -300px; /* hidden by default */
+  width: 280px;
+  height: 100vh;
+
+  background: rgba(160,200,255,0.06);
+  border-right: 1px solid rgba(160,200,255,0.15);
+  backdrop-filter: blur(12px);
+
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+
+  box-shadow: 0 0 25px rgba(120,180,255,0.25);
+  transition: left 0.35s ease;
+  z-index: 9999;
 }
 
-#dmSidebar.open{
-  left:20px;
+#dmSidebar.open {
+  left: 0;
 }
 
 .dm-search{
