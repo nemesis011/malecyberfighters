@@ -8,6 +8,9 @@ $('btnMinimize').addEventListener('click', () => {
   const c = $('chatPopup');
   c.style.display = c.style.display === 'none' ? 'flex' : 'none';
 });
+$('btnRooms').addEventListener('click', () => {
+  $('roomsSidebar').classList.toggle('open');
+});
 
 $('sendPublic').addEventListener('click', sendPublicMessage);
 $('publicMessage').addEventListener('keydown', e => { 
@@ -162,6 +165,28 @@ function renderRosterPage() {
     popup.style.transition = '';
   });
 })();
+
+$('btnCreateRoom').addEventListener('click', () => {
+  const name = prompt("Enter a room name:");
+  if (!name) return;
+
+  socket.emit("createRoom", { name });
+});
+function renderRoomsList(rooms) {
+  const list = $('roomsList');
+  list.innerHTML = '';
+
+  rooms.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'room-item';
+    div.textContent = r.name;
+    div.addEventListener('click', () => joinRoom(r.name));
+    list.appendChild(div);
+  });
+}
+function joinRoom(roomName) {
+  socket.emit("joinRoom", { room: roomName });
+}
 
 /* -----------------------------------------------------------
    ONLINE LIST (CHAT SIDEBAR)
