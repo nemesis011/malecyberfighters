@@ -20,6 +20,35 @@ function renderMessageAvatar(username, display, imageUrl, size = 36) {
   return `<div class="avatar-fallback" style="width:${size}px;height:${size}px">${initials}</div>`;
 }
 
+function renderQuickRoster() {
+  const el = $('quickRoster');
+  if (!el) return;
+
+  el.innerHTML = '';
+
+  (window.users || []).slice(0, 6).forEach(u => {
+    const avatarHtml = renderMessageAvatar(
+      u.username,
+      u.display,
+      u.imageUrl,
+      40 // slightly larger for roster
+    );
+
+    const div = document.createElement('div');
+    div.className = 'user-row';
+    div.innerHTML = `
+      <div class="avatar-wrapper">${avatarHtml}</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${u.display}</div>
+        <div class="small">${u.username}</div>
+      </div>
+      <div class="status online"></div>
+    `;
+
+    el.appendChild(div);
+  });
+}
+
 // -------------------------------------------------------------
 // CHAT OPEN
 // -------------------------------------------------------------
