@@ -274,6 +274,9 @@ socket.on('publicMessage', msg => {
   appendPublicMessage(msg);
 });
 
+socket.on("externalPublicMessage", msg => {
+  appendPublicMessage(msg);
+});
 
 /* ============================================================
    PUBLIC CHAT — RENDER MESSAGE
