@@ -169,13 +169,7 @@ function updateDMListSidebar(){
     list.appendChild(div);
   });
 }
-$('closeDmSidebar')?.addEventListener('click', () => {
-  $('dmSidebar').classList.remove('open');
-});
 
-$('closeRoomsSidebar')?.addEventListener('click', () => {
-  $('roomsSidebar').classList.remove('open');
-});
 
 /* ============================================================
    PRESENCE UPDATES
