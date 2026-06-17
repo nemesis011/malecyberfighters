@@ -424,7 +424,8 @@ io.on('connection', (socket) => {
   });
 
   // PUBLIC MESSAGE
-  socket.on('publicMessage', async (msg) => {
+ socket.on('publicMessage', async (msg) => {
+  try {
     const enriched = {
       from: msg.from,
       display: msg.display,
@@ -432,14 +433,27 @@ io.on('connection', (socket) => {
       time: new Date()
     };
 
-    try {
-      await PublicMessage.create(enriched);
-    } catch (err) {
-      console.error("Failed to save public message:", err);
-    }
+    // Save to MongoDB
+    await PublicMessage.create(enriched);
 
+    // Broadcast to all clients
     io.emit('publicMessage', enriched);
-  });
+
+    // ⭐ SEND TO DISCORD WEBHOOK ⭐
+    const user = await User.findOne({ username: msg.from }).lean();
+    const avatarUrl = user?.imageUrl || null;
+
+    await sendDiscordWebhookMessage(
+      msg.display || msg.from,
+      msg.text,
+      avatarUrl
+    );
+
+  } catch (err) {
+    console.error("Error in publicMessage:", err);
+  }
+});
+
 
   // ROOM JOIN
   socket.on("joinRoom", async ({ room }) => {
