@@ -385,7 +385,7 @@ io.on('connection', (socket) => {
     if (!u) return;
 
     const onlineUsers = await User.find({ online: true })
-      .select('username display imageUrl color -_id')
+      .select('username display imageUrl info wins losses color language age createdAt -_id')
       .lean();
 
     io.emit('presence', onlineUsers);
@@ -401,7 +401,7 @@ io.on('connection', (socket) => {
     );
 
     const onlineUsers = await User.find({ online: true })
-      .select("username display imageUrl color -_id")
+      .select("username display imageUrl info wins losses color language age createdAt -_id")
       .lean();
 
     io.emit("presence", onlineUsers);
@@ -417,7 +417,7 @@ io.on('connection', (socket) => {
     );
 
     const onlineUsers = await User.find({ online: true })
-      .select("username display imageUrl color -_id")
+      .select("username display imageUrl info wins losses color language age createdAt -_id")
       .lean();
 
     io.emit("presence", onlineUsers);
@@ -496,7 +496,7 @@ io.on('connection', (socket) => {
 
     if (u) {
       const onlineUsers = await User.find({ online: true })
-        .select('username display imageUrl color -_id')
+        .select('username display imageUrl info wins losses color language age createdAt -_id')
         .lean();
 
       io.emit('presence', onlineUsers);
