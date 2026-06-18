@@ -828,6 +828,80 @@ table tr:hover {
   </div>
 </div>
 
+<!-- VIEW PROFILE POPUP -->
+<div id="modalViewProfile" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+">
+  <div style="
+    background:#111;
+    padding:20px;
+    border-radius:12px;
+    width:420px;
+    max-height:90vh;
+    overflow:auto;
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 id="vpName" style="margin:0"></h3>
+      <button id="vpClose" class="ghost">✕</button>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px">
+      <img id="vpAvatar" src="" style="
+        width:120px;
+        height:120px;
+        border-radius:12px;
+        object-fit:cover;
+        border:1px solid rgba(160,200,255,0.25);
+      ">
+    </div>
+
+    <div class="small muted">@<span id="vpUsername"></span></div>
+
+    <div style="margin-top:12px">
+      <div class="muted">Bio:</div>
+      <div id="vpBio" style="margin-top:4px"></div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:20px">
+      <div>
+        <div class="muted">Wins</div>
+        <div id="vpWins" style="color:var(--accent);font-weight:700"></div>
+      </div>
+      <div>
+        <div class="muted">Losses</div>
+        <div id="vpLosses" style="color:var(--accent);font-weight:700"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="muted">Favorite Color</div>
+      <div id="vpColorBox" style="
+        width:40px;
+        height:20px;
+        border-radius:4px;
+        margin-top:4px;
+        border:1px solid rgba(160,200,255,0.25);
+      "></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="muted">Language</div>
+      <div id="vpLang"></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="muted">Age</div>
+      <div id="vpAge"></div>
+    </div>
+
+  </div>
+</div>
 
 <!-- CHAT POPUP -->
 <div id="chatPopup" class="chat-popup" style="display:none">
