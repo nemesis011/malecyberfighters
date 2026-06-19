@@ -496,19 +496,20 @@ io.on('connection', (socket) => {
     io.to(msg.room).emit("roomMessage", enriched);
   });
 
-  socket.on("createRoom", async ({ name, private }) => {
+ socket.on("createRoom", async ({ name, private }) => {
   if (!name) return;
 
   const room = await Room.create({
     name,
     private: !!private,
     owner: socket.username,
+    invitedUsers: [],
     createdAt: new Date()
   });
 
   socket.join(room._id.toString());
 
-  // Send updated room list to all users
+  // ⭐ SEND UPDATED ROOM LIST TO ALL USERS
   const rooms = await Room.find().lean();
   io.emit("roomsList", rooms);
 });
