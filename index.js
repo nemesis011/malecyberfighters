@@ -116,6 +116,7 @@ const User = mongoose.model('User', userSchema);
 const PublicMessage = mongoose.model("PublicMessage", publicMessageSchema);
 const RoomMessage = mongoose.model("RoomMessage", roomMessageSchema);
 const IpLog = mongoose.model('IpLog', ipLogSchema);
+const Room = mongoose.model('Room', RoomSchema);
 
 // ---------- HELPERS ----------
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
