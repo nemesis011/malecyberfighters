@@ -494,6 +494,23 @@ io.on('connection', (socket) => {
     io.to(msg.room).emit("roomMessage", enriched);
   });
 
+  socket.on("createRoom", async ({ name, private }) => {
+  if (!name) return;
+
+  const room = await Room.create({
+    name,
+    private: !!private,
+    owner: socket.username,
+    createdAt: new Date()
+  });
+
+  socket.join(room._id.toString());
+
+  // Send updated room list to all users
+  const rooms = await Room.find().lean();
+  io.emit("roomsList", rooms);
+});
+
   // DISCONNECT (fallback)
   socket.on('disconnect', async () => {
     const u = await User.findOneAndUpdate(
