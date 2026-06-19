@@ -7,7 +7,11 @@ async function checkAvailability(username, email){
   const params = new URLSearchParams();
   if(username) params.append('username', username);
   if(email) params.append('email', email);
-  const res = await fetch('/api/check-availability?' + params.toString());
+const res = await fetch("/api/check-availability", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, email })
+});
   return res.json();
 }
 
