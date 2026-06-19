@@ -631,5 +631,24 @@ $('roomSort')?.addEventListener('change', renderRoomsSidebar);
 socket.on("roomInvited", ({ roomId, roomName }) => {
   alert(`You have been invited to join the private room: ${roomName}`);
 });
+// OPEN TOS
+$('btnTOS')?.addEventListener('click', () => {
+  $('modalTOS').style.display = 'flex';
+});
+
+// CLOSE TOS
+$('closeTOS')?.addEventListener('click', () => {
+  $('modalTOS').style.display = 'none';
+});
+
+// OPEN PRIVACY
+$('btnPrivacy')?.addEventListener('click', () => {
+  $('modalPrivacy').style.display = 'flex';
+});
+
+// CLOSE PRIVACY
+$('closePrivacy')?.addEventListener('click', () => {
+  $('modalPrivacy').style.display = 'none';
+});
 
 
