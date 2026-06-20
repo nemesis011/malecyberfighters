@@ -581,10 +581,6 @@ rooms = rooms.filter(r => {
   return false;
 });
 
-div.addEventListener("click", () => {
-  openRoomPopup(room._id, room.name);
-});
-
 
   // SORTING
   if (sort === "newest") {
@@ -610,8 +606,8 @@ div.addEventListener("click", () => {
     `;
 
     div.addEventListener("click", () => {
-      joinRoom(room._id);
-    });
+  openRoomPopup(room._id, room.name);
+});
 if (room.owner === window.username) {
   const inviteBtn = document.createElement("button");
   inviteBtn.className = "ghost small-btn";
@@ -656,5 +652,25 @@ $('btnPrivacy')?.addEventListener('click', () => {
 $('closePrivacy')?.addEventListener('click', () => {
   $('modalPrivacy').style.display = 'none';
 });
+function openRoomPopup(roomId, roomName) {
+  const popup = $('roomChatPopup');
+  $('roomChatTitle').textContent = roomName;
 
+  popup.dataset.room = roomId;
+  popup.style.display = 'flex';
+
+  socket.emit("joinRoom", { room: roomId });
+}
+
+$('roomSendBtn').addEventListener('click', () => {
+  const room = $('roomChatPopup').dataset.room;
+  const text = $('roomMessageInput').value.trim();
+  if (!text) return;
+
+  sendRoomMessage(room, text);
+  $('roomMessageInput').value = '';
+});
+$('roomChatClose').addEventListener('click', () => {
+  $('roomChatPopup').style.display = 'none';
+});
 
