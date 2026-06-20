@@ -162,6 +162,19 @@ async function sendDiscordWebhookMessage(username, message, avatarUrl) {
   }
 }
 
+app.get("/api/admin/users", async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("username display email imageUrl info wins losses color language age role banned createdAt")
+      .lean();
+
+    res.json({ success: true, users });
+  } catch (err) {
+    console.error("Admin user fetch error:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
 app.post("/api/check-availability", async (req, res) => {
   try {
     const { username, email } = req.body;
