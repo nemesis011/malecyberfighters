@@ -166,20 +166,34 @@ app.post("/api/check-availability", async (req, res) => {
   try {
     const { username, email } = req.body;
 
-    const exists = await User.findOne({
+    const conflict = {
+      username: false,
+      email: false
+    };
+
+    const user = await User.findOne({
       $or: [
         { username: username?.toLowerCase() },
         { email: email?.toLowerCase() }
       ]
     });
 
+    if (user) {
+      if (user.username === username.toLowerCase()) conflict.username = true;
+      if (user.email === email.toLowerCase()) conflict.email = true;
+    }
+
     res.json({
-      available: !exists
+      ok: !conflict.username && !conflict.email,
+      conflict
     });
 
   } catch (err) {
-    console.error("Availability check error:", err);
-    res.status(500).json({ available: false });
+    console.error("check-availability error:", err);
+    res.json({
+      ok: false,
+      conflict: { username: false, email: false }
+    });
   }
 });
 
