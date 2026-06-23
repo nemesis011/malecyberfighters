@@ -465,6 +465,46 @@ app.post("/api/chatMessage", async (req, res) => {
   res.json({ ok: true, messages });
 });
 
+app.post("/api/dm/partners", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.json({ ok: false, partners: [] });
+  }
+
+  const messages = await DM.find({
+    $or: [
+      { from: username },
+      { to: username }
+    ]
+  }).lean();
+
+  const partners = new Set();
+
+  messages.forEach(m => {
+    if (m.from !== username) partners.add(m.from);
+    if (m.to !== username) partners.add(m.to);
+  });
+
+  res.json({ ok: true, partners: [...partners] });
+});
+
+app.post("/api/dm/clear", async (req, res) => {
+  const { a, b } = req.body;
+
+  if (!a || !b) {
+    return res.json({ ok: false, error: "missing_users" });
+  }
+
+  await DM.deleteMany({
+    $or: [
+      { from: a, to: b },
+      { from: b, to: a }
+    ]
+  });
+
+  res.json({ ok: true });
+});
 
 app.get("/api/allUsers", async (req, res) => {
   try {
