@@ -196,6 +196,7 @@ socket.on("privateMessage", pm => {
   }
 });
 
+
 /* TYPING INDICATOR RECEIVE */
 socket.on("typingDM", ({ from }) => {
   const el = document.getElementById("pmTyping_" + from);
