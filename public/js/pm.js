@@ -32,7 +32,7 @@ function openPrivateWindow(targetUsername) {
     return;
   }
 
-  // CREATE WINDOW
+  // CREATE WINDOW FIRST (fixes TDZ)
   const pmWindow = document.createElement("div");
   pmWindow.className = "pm-window";
   pmWindow.id = "pmWindow_" + targetUsername;
@@ -62,20 +62,21 @@ function openPrivateWindow(targetUsername) {
 
   document.body.appendChild(pmWindow);
 
-  // TYPING INDICATOR
+  // NOW typing indicator can be added safely
   const typing = document.createElement("div");
   typing.id = "pmTyping_" + targetUsername;
   typing.className = "small muted";
   typing.style.display = "none";
   typing.textContent = `${targetUsername} is typing...`;
+
   pmWindow.querySelector(".pm-body").appendChild(typing);
 
-  // CLOSE WINDOW
+  // Close window
   pmWindow.querySelector(".pm-close").addEventListener("click", () => {
     pmWindow.remove();
   });
 
-  // CLEAR HISTORY (server + UI)
+  // Clear history
   pmWindow.querySelector(".pm-clear").addEventListener("click", async () => {
     if (!confirm("Clear this DM history?")) return;
 
@@ -92,7 +93,7 @@ function openPrivateWindow(targetUsername) {
     if (window.updateDMListSidebar) updateDMListSidebar();
   });
 
-  // TYPING EVENTS
+  // Typing indicator logic
   let typingTimeout;
 
   document
@@ -112,7 +113,7 @@ function openPrivateWindow(targetUsername) {
       }, 1200);
     });
 
-  // SEND MESSAGE
+  // Send message
   document
     .getElementById("pmSend_" + targetUsername)
     .addEventListener("click", () => sendPM(targetUsername));
@@ -123,7 +124,7 @@ function openPrivateWindow(targetUsername) {
       if (e.key === "Enter") sendPM(targetUsername);
     });
 
-  // LOAD HISTORY FROM SERVER
+  // Load history
   loadDMHistory(s.username, targetUsername).then(history => {
     const body = document.getElementById("pmBody_" + targetUsername);
     if (body) body._history = history;
