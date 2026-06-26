@@ -687,7 +687,16 @@ function openRoomPopup(roomId, roomName) {
   clearRoomUnread(roomId);
   updateRoomsSidebarBadges();
 
-  socket.emit("joinRoom", { room: roomId });
+ socket.emit("joinRoom", { room: roomId });
+
+// Request member list refresh
+setTimeout(() => {
+  socket.emit("requestRoomMembers", { room: roomId });
+}, 200);
+socket.on("requestRoomMembers", ({ room }) => {
+  updateRoomMembers(room);
+});
+
 }
 
 
@@ -730,4 +739,33 @@ socket.on("stopTypingRoom", ({ from, room }) => {
   if (current !== room) return;
 
   $('roomTyping').style.display = "none";
+});
+function renderRoomMembers(members) {
+  const list = $('roomMembersList');
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  members.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "room-member";
+
+    const avatar = m.imageUrl
+      ? `<img src="${m.imageUrl}" style="width:32px;height:32px;border-radius:50%">`
+      : `<div class="avatar-fallback" style="width:32px;height:32px">${m.display[0]}</div>`;
+
+    div.innerHTML = `
+      ${avatar}
+      <div style="flex:1">
+        <div style="font-weight:700">${m.display}</div>
+        <div class="small">@${m.username}</div>
+      </div>
+      <div class="room-member-status ${m.online ? "online" : "offline"}"></div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+socket.on("roomMembers", members => {
+  renderRoomMembers(members);
 });
