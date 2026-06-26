@@ -30,6 +30,32 @@ function openPrivateWindow(targetUsername) {
     if (window.updateDMListSidebar) updateDMListSidebar();
     return;
   }
+const typing = document.createElement("div");
+typing.id = "pmTyping_" + targetUsername;
+typing.className = "small muted";
+typing.style.display = "none";
+typing.textContent = `${targetUsername} is typing...`;
+
+pm.querySelector(".pm-body").appendChild(typing);
+
+   let typingTimeout;
+
+document
+  .getElementById("pmInput_" + targetUsername)
+  .addEventListener("input", () => {
+    socket.emit("typingDM", {
+      from: s.username,
+      to: targetUsername
+    });
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      socket.emit("stopTypingDM", {
+        from: s.username,
+        to: targetUsername
+      });
+    }, 1200);
+  });
 
   const pm = document.createElement("div");
   pm.className = "pm-window";
