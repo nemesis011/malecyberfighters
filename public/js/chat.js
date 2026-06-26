@@ -703,3 +703,31 @@ $('roomChatClose').addEventListener('click', () => {
   $('roomChatPopup').style.display = 'none';
 });
 
+let roomTypingTimeout;
+
+$('roomMessageInput').addEventListener("input", () => {
+  const room = $('roomChatPopup').dataset.room;
+  const s = getSession();
+
+  socket.emit("typingRoom", { room, from: s.username });
+
+  clearTimeout(roomTypingTimeout);
+  roomTypingTimeout = setTimeout(() => {
+    socket.emit("stopTypingRoom", { room, from: s.username });
+  }, 1200);
+});
+socket.on("typingRoom", ({ from, room }) => {
+  const current = $('roomChatPopup').dataset.room;
+  if (current !== room) return;
+
+  const el = $('roomTyping');
+  el.textContent = `${from} is typing...`;
+  el.style.display = "block";
+});
+
+socket.on("stopTypingRoom", ({ from, room }) => {
+  const current = $('roomChatPopup').dataset.room;
+  if (current !== room) return;
+
+  $('roomTyping').style.display = "none";
+});
