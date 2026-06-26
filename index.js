@@ -701,6 +701,30 @@ members.forEach(async u => {
 });
 
   });
+// USER STARTED TYPING (DM)
+socket.on("typingDM", ({ from, to }) => {
+  const target = [...io.sockets.sockets.values()].find(s => s.username === to);
+  if (target) {
+    io.to(target.id).emit("typingDM", { from });
+  }
+});
+
+// USER STOPPED TYPING (DM)
+socket.on("stopTypingDM", ({ from, to }) => {
+  const target = [...io.sockets.sockets.values()].find(s => s.username === to);
+  if (target) {
+    io.to(target.id).emit("stopTypingDM", { from });
+  }
+});
+
+// ROOM TYPING
+socket.on("typingRoom", ({ room, from }) => {
+  socket.to(room).emit("typingRoom", { from, room });
+});
+
+socket.on("stopTypingRoom", ({ room, from }) => {
+  socket.to(room).emit("stopTypingRoom", { from, room });
+});
 
  socket.on("createRoom", async ({ name, private }) => {
   if (!name) return;
