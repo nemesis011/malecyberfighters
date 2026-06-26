@@ -1081,29 +1081,36 @@ table tr:hover {
   <button id="createRoomBtn" class="small-btn">Create Room</button>
 </div>
 
-  <div id="roomChatPopup" class="chat-popup" style="display:none">
+<!-- ROOM CHAT POPUP -->
+<div id="roomChatPopup" class="chat-popup" style="display:none" data-room="">
   <div class="chat-header">
-    <div id="roomChatTitle">Room</div>
-    <div>
-      <button id="roomChatClose" class="small-btn">X</button>
+    <span id="roomChatTitle">Room</span>
+    <button id="closeRoomChat" class="ghost small-btn">X</button>
+  </div>
+
+  <div class="chat-body" style="display:flex; height:100%">
+    
+    <!-- LEFT: ROOM FEED -->
+    <div id="roomFeed" class="public-feed" style="flex:1; overflow-y:auto;"></div>
+
+    <!-- RIGHT: MEMBERS COLUMN -->
+    <div id="roomMembers" class="room-members-panel">
+      <div class="side-panel-header">Members</div>
+      <div id="roomMembersList"></div>
     </div>
+
   </div>
 
-  <div class="chat-body">
-  <div class="public-feed" id="roomFeed"></div>
+  <!-- TYPING INDICATOR -->
+  <div id="roomTyping" class="small muted" style="display:none; margin:6px 0 0 10px;"></div>
 
-  <div id="roomMembers" class="room-members-panel">
-    <div class="side-panel-header">Members</div>
-    <div id="roomMembersList"></div>
-  </div>
-<div id="roomTyping" class="small muted" style="display:none;margin-left:10px"></div>
-
+  <!-- INPUT BAR -->
   <div class="chat-input">
     <input id="roomMessageInput" type="text" placeholder="Message room">
-    <button id="roomSendBtn">Send</button>
+    <button id="roomSendBtn" class="send-btn">Send</button>
   </div>
 </div>
-  </div>
+
 <!-- TERMS OF SERVICE POPUP -->
 <div id="modalTOS" class="modal-overlay" style="display:none">
   <div class="modal-box">
