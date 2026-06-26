@@ -183,6 +183,23 @@ async function sendDiscordWebhookMessage(username, message, avatarUrl) {
     console.error("Error sending webhook:", err);
   }
 }
+async function updateRoomMembers(roomId) {
+  const sockets = await io.in(roomId).fetchSockets();
+
+  const members = await Promise.all(
+    sockets.map(async s => {
+      const user = await User.findOne({ username: s.username }).lean();
+      return {
+        username: user.username,
+        display: user.display,
+        imageUrl: user.imageUrl,
+        online: user.online
+      };
+    })
+  );
+
+  io.to(roomId).emit("roomMembers", members);
+}
 
 app.get("/api/admin/users", async (req, res) => {
   try {
@@ -664,13 +681,14 @@ socket.on("privateMessage", async pm => {
   socket.on("joinRoom", async ({ room }) => {
     socket.join(room);
 
-    const history = await RoomMessage
-      .find({ room })
-      .sort({ time: 1 })
-      .limit(200)
-      .lean();
+    socket.currentRoom = room;
 
-    io.to(socket.id).emit("roomHistory", { room, history });
+  // Send history
+  const history = await RoomMessage.find({ room }).sort({ time: 1 }).limit(200).lean();
+  io.to(socket.id).emit("roomHistory", { room, history });
+
+  // Update member list
+  updateRoomMembers(room);
   });
 
   // ROOM MESSAGE
@@ -786,9 +804,12 @@ socket.on("stopTypingRoom", ({ room, from }) => {
 
       io.emit('presence', onlineUsers);
     }
-
+ if (socket.currentRoom) {
+    updateRoomMembers(socket.currentRoom);
+  }
     console.log('socket disconnected', socket.id);
   });
+   
 });
 
 // ---------- START ----------
