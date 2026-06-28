@@ -13,35 +13,24 @@ async function loadDMHistory(a, b) {
   return data.messages || [];
 }
 
-/* ---------- File → Base64 + Upload ---------- */
-
-function fileToBase64(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
-      resolve(base64);
-    };
-    reader.readAsDataURL(file);
-  });
-}
+/* ---------- Upload Image Using FormData (matches your server) ---------- */
 
 async function uploadImageToServer(file) {
-  const base64 = await fileToBase64(file);
+  const form = new FormData();
+  form.append("image", file); // MUST be "image" to match multer.single('image')
 
   const res = await fetch("/api/upload-image", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: base64 })
+    body: form
   });
 
-  return await res.json(); // { success, url }
+  return await res.json(); // { ok:true, url:"..." }
 }
 
 async function uploadDMImage(targetUsername, file) {
   const data = await uploadImageToServer(file);
 
-  if (!data.success) {
+  if (!data.ok) {
     alert("Image upload failed");
     return;
   }
@@ -159,6 +148,8 @@ function openPrivateWindow(targetUsername) {
     .addEventListener("keydown", e => {
       if (e.key === "Enter") sendPM(targetUsername);
     });
+
+  /* ---------- DM Image Upload Buttons (now correct) ---------- */
 
   document
     .getElementById("pmImageBtn_" + targetUsername)
@@ -334,4 +325,14 @@ function updateDMListSidebar() {
     });
 }
 
-
+/* ============================================================
+   IMAGE CSS (add to your stylesheet)
+============================================================ */
+/*
+.chat-image {
+  max-width: 220px;
+  border-radius: 8px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+*/
