@@ -1,5 +1,5 @@
 /* ============================================================
-   SERVER-SYNCED DM SYSTEM (MongoDB + Translation)
+   SERVER-SYNCED DM SYSTEM (MongoDB + Translation + Images)
 ============================================================ */
 
 async function loadDMHistory(a, b) {
@@ -13,6 +13,48 @@ async function loadDMHistory(a, b) {
   return data.messages || [];
 }
 
+/* ---------- File → Base64 + Upload ---------- */
+
+function fileToBase64(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      resolve(base64);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImageToServer(file) {
+  const base64 = await fileToBase64(file);
+
+  const res = await fetch("/api/upload-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: base64 })
+  });
+
+  return await res.json(); // { success, url }
+}
+
+async function uploadDMImage(targetUsername, file) {
+  const data = await uploadImageToServer(file);
+
+  if (!data.success) {
+    alert("Image upload failed");
+    return;
+  }
+
+  socket.emit("privateMessage", {
+    from: getSession().username,
+    to: targetUsername,
+    imageUrl: data.url
+  });
+}
+
+/* ---------- Open DM Window ---------- */
+
 function openPrivateWindow(targetUsername) {
   const s = getSession();
   if (!s) {
@@ -24,7 +66,6 @@ function openPrivateWindow(targetUsername) {
     return;
   }
 
-  // If window already exists → bring it forward + clear unread
   const existing = document.getElementById("pmWindow_" + targetUsername);
   if (existing) {
     clearUnread(targetUsername);
@@ -32,7 +73,6 @@ function openPrivateWindow(targetUsername) {
     return;
   }
 
-  // CREATE WINDOW FIRST (fixes TDZ)
   const pmWindow = document.createElement("div");
   pmWindow.className = "pm-window";
   pmWindow.id = "pmWindow_" + targetUsername;
@@ -56,30 +96,25 @@ function openPrivateWindow(targetUsername) {
 
     <div class="pm-input">
       <input id="pmInput_${targetUsername}" type="text" placeholder="Message ${targetUsername}">
-      <button class="small-btn" id="pmSend_${targetUsername}">Send</button>
       <input type="file" id="pmImage_${targetUsername}" accept="image/*" style="display:none">
-<button class="small-btn" id="pmImageBtn_${targetUsername}">📷</button>
-
+      <button class="small-btn" id="pmImageBtn_${targetUsername}">📷</button>
+      <button class="small-btn" id="pmSend_${targetUsername}">Send</button>
     </div>
   `;
 
   document.body.appendChild(pmWindow);
 
-  // NOW typing indicator can be added safely
   const typing = document.createElement("div");
   typing.id = "pmTyping_" + targetUsername;
   typing.className = "small muted";
   typing.style.display = "none";
   typing.textContent = `${targetUsername} is typing...`;
-
   pmWindow.querySelector(".pm-body").appendChild(typing);
 
-  // Close window
   pmWindow.querySelector(".pm-close").addEventListener("click", () => {
     pmWindow.remove();
   });
 
-  // Clear history
   pmWindow.querySelector(".pm-clear").addEventListener("click", async () => {
     if (!confirm("Clear this DM history?")) return;
 
@@ -96,7 +131,6 @@ function openPrivateWindow(targetUsername) {
     if (window.updateDMListSidebar) updateDMListSidebar();
   });
 
-  // Typing indicator logic
   let typingTimeout;
 
   document
@@ -116,7 +150,6 @@ function openPrivateWindow(targetUsername) {
       }, 1200);
     });
 
-  // Send message
   document
     .getElementById("pmSend_" + targetUsername)
     .addEventListener("click", () => sendPM(targetUsername));
@@ -127,7 +160,19 @@ function openPrivateWindow(targetUsername) {
       if (e.key === "Enter") sendPM(targetUsername);
     });
 
-  // Load history
+  document
+    .getElementById("pmImageBtn_" + targetUsername)
+    .addEventListener("click", () => {
+      document.getElementById("pmImage_" + targetUsername).click();
+    });
+
+  document
+    .getElementById("pmImage_" + targetUsername)
+    .addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) uploadDMImage(targetUsername, file);
+    });
+
   loadDMHistory(s.username, targetUsername).then(history => {
     const body = document.getElementById("pmBody_" + targetUsername);
     if (body) body._history = history;
@@ -138,16 +183,7 @@ function openPrivateWindow(targetUsername) {
   if (window.updateDMListSidebar) updateDMListSidebar();
 }
 
-document.getElementById("pmImageBtn_" + targetUsername)
-  .addEventListener("click", () => {
-    document.getElementById("pmImage_" + targetUsername).click();
-  });
-
-document.getElementById("pmImage_" + targetUsername)
-  .addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (file) uploadDMImage(targetUsername, file);
-  });
+/* ---------- Send DM ---------- */
 
 function sendPM(targetUsername) {
   const s = getSession();
@@ -169,6 +205,8 @@ function sendPM(targetUsername) {
   input.value = "";
 }
 
+/* ---------- Render DM History ---------- */
+
 function renderPMHistory(targetUsername, messages) {
   const s = getSession();
   const body = document.getElementById("pmBody_" + targetUsername);
@@ -181,13 +219,14 @@ function renderPMHistory(targetUsername, messages) {
     div.className = "message " + (m.from === s.username ? "me" : "");
     div.innerHTML = `
       <div style="font-size:13px;font-weight:700">${m.from}</div>
-      <div style="margin-top:6px">${escapeHtml(m.text)}</div>
+      <div style="margin-top:6px">${escapeHtml(m.text || "")}</div>
     `;
-     if (m.imageUrl) {
-  div.innerHTML += `
-    <img src="${m.imageUrl}" class="chat-image" onclick="window.open('${m.imageUrl}', '_blank')">
-  `;
-}
+
+    if (m.imageUrl) {
+      div.innerHTML += `
+        <img src="${m.imageUrl}" class="chat-image" onclick="window.open('${m.imageUrl}', '_blank')">
+      `;
+    }
 
     body.appendChild(div);
   });
@@ -198,6 +237,7 @@ function renderPMHistory(targetUsername, messages) {
 /* ============================================================
    RECEIVE DM FROM SERVER
 ============================================================ */
+
 socket.on("privateMessage", pm => {
   const me = getSession();
   if (!me) return;
@@ -216,8 +256,8 @@ socket.on("privateMessage", pm => {
   }
 });
 
+/* ---------- Typing Indicator Receive ---------- */
 
-/* TYPING INDICATOR RECEIVE */
 socket.on("typingDM", ({ from }) => {
   const el = document.getElementById("pmTyping_" + from);
   if (el) el.style.display = "block";
@@ -231,6 +271,7 @@ socket.on("stopTypingDM", ({ from }) => {
 /* ============================================================
    DM SIDEBAR
 ============================================================ */
+
 function updateDMListSidebar() {
   const sidebar = document.getElementById("dmSidebar");
   if (!sidebar) return;
@@ -292,17 +333,5 @@ function updateDMListSidebar() {
       });
     });
 }
-async function uploadDMImage(targetUsername, file) {
-  const data = await uploadImageToServer(file);
 
-  if (!data.success) {
-    alert("Image upload failed");
-    return;
-  }
 
-  socket.emit("privateMessage", {
-    from: getSession().username,
-    to: targetUsername,
-    imageUrl: data.url
-  });
-}
