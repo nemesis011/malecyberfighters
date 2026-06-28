@@ -57,6 +57,9 @@ function openPrivateWindow(targetUsername) {
     <div class="pm-input">
       <input id="pmInput_${targetUsername}" type="text" placeholder="Message ${targetUsername}">
       <button class="small-btn" id="pmSend_${targetUsername}">Send</button>
+      <input type="file" id="pmImage_${targetUsername}" accept="image/*" style="display:none">
+<button class="small-btn" id="pmImageBtn_${targetUsername}">📷</button>
+
     </div>
   `;
 
@@ -135,6 +138,17 @@ function openPrivateWindow(targetUsername) {
   if (window.updateDMListSidebar) updateDMListSidebar();
 }
 
+document.getElementById("pmImageBtn_" + targetUsername)
+  .addEventListener("click", () => {
+    document.getElementById("pmImage_" + targetUsername).click();
+  });
+
+document.getElementById("pmImage_" + targetUsername)
+  .addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) uploadDMImage(targetUsername, file);
+  });
+
 function sendPM(targetUsername) {
   const s = getSession();
   if (!s) return;
@@ -169,6 +183,12 @@ function renderPMHistory(targetUsername, messages) {
       <div style="font-size:13px;font-weight:700">${m.from}</div>
       <div style="margin-top:6px">${escapeHtml(m.text)}</div>
     `;
+     if (m.imageUrl) {
+  div.innerHTML += `
+    <img src="${m.imageUrl}" class="chat-image" onclick="window.open('${m.imageUrl}', '_blank')">
+  `;
+}
+
     body.appendChild(div);
   });
 
@@ -271,4 +291,18 @@ function updateDMListSidebar() {
         renderList(e.target.value.trim());
       });
     });
+}
+async function uploadDMImage(targetUsername, file) {
+  const data = await uploadImageToServer(file);
+
+  if (!data.success) {
+    alert("Image upload failed");
+    return;
+  }
+
+  socket.emit("privateMessage", {
+    from: getSession().username,
+    to: targetUsername,
+    imageUrl: data.url
+  });
 }
