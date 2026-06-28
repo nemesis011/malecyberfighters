@@ -27,6 +27,29 @@ function getSession(){
   }
 }
 
+function fileToBase64(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1]; // remove data:image/... prefix
+      resolve(base64);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImageToServer(file) {
+  const base64 = await fileToBase64(file);
+
+  const res = await fetch("/api/upload-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: base64 })
+  });
+
+  return await res.json(); // { success: true, url: "https://..." }
+}
+
 /* ============================================================
    AVATAR RENDERING
 ============================================================ */
@@ -518,9 +541,38 @@ function appendRoomMessage(msg){
       <div>${escapeHtml(msg.text)}</div>
     </div>
   `;
+if (msg.imageUrl) {
+  html += `
+    <img src="${msg.imageUrl}" class="chat-image" onclick="window.open('${msg.imageUrl}', '_blank')">
+  `;
+}
 
   feed.appendChild(div);
   feed.scrollTop = feed.scrollHeight;
+}
+
+document.getElementById("roomImageBtn").addEventListener("click", () => {
+  document.getElementById("roomImageInput").click();
+});
+
+document.getElementById("roomImageInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) uploadRoomImage(file);
+});
+
+async function uploadRoomImage(file) {
+  const data = await uploadImageToServer(file);
+
+  if (!data.success) {
+    alert("Image upload failed");
+    return;
+  }
+
+  socket.emit("roomMessage", {
+    room: document.getElementById("roomChatPopup").dataset.room,
+    from: getSession().username,
+    imageUrl: data.url
+  });
 }
 
 /* ============================================================
