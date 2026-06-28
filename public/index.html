@@ -673,6 +673,13 @@ table tr:hover {
   background: #b8c7d9;
 }
 
+  .chat-image {
+  max-width: 220px;
+  border-radius: 8px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
 </style>
 </head>
 
@@ -1108,6 +1115,9 @@ table tr:hover {
   <div class="chat-input">
     <input id="roomMessageInput" type="text" placeholder="Message room">
     <button id="roomSendBtn" class="send-btn">Send</button>
+    <input type="file" id="roomImageInput" accept="image/*" style="display:none">
+<button id="roomImageBtn">📷</button>
+
   </div>
 </div>
 
