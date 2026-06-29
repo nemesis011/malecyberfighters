@@ -26,7 +26,7 @@ const DISCORD_SUPPORT_URL = process.env.Discord_Support || null;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "landing.html"));
+  res.sendFile(path.join(__dirname, "landing.html"));
 });
 
 // ---------- MIDDLEWARE ----------
