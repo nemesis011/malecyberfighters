@@ -679,12 +679,64 @@ table tr:hover {
   margin-top: 6px;
   cursor: pointer;
 }
+/* AGE GATE */
+#ageGate {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 1.2s ease;
+}
+
+#ageBox {
+  background: #111;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: center;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+#confirmBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #e60000;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* INTRO GIF */
+#introGif {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  z-index: 9998;
+  transition: opacity 1.2s ease;
+}
 
 </style>
 </head>
 
 
 <body>
+<!-- AGE GATE OVERLAY -->
+<div id="ageGate">
+  <div id="ageBox">
+    <h2>Are you 18 or older</h2>
+    <button id="confirmBtn">Yes, Enter</button>
+  </div>
+</div>
+
+<!-- INTRO GIF -->
+<div id="introGif"></div>
 
 <!-- DM SIDEBAR (hidden until toggled) -->
 <div id="dmSidebar"></div>
@@ -1714,6 +1766,23 @@ Don't hesitate to contact us if you have any questions.
 <script src="/js/analytics.js"></script>
   <script src="/js/dm-toggle.js"></script>
   <script src="/js/profile.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const gate = document.getElementById("ageGate");
+  const gif = document.getElementById("introGif");
+  const btn = document.getElementById("confirmBtn");
+
+  btn.addEventListener("click", () => {
+    gif.style.backgroundImage = "url('/images/intro.gif')";
+    gif.style.opacity = "1";      // fade GIF in
+    gate.style.opacity = "0";     // fade overlay out
+
+    setTimeout(() => {
+      gate.style.display = "none";   // remove overlay
+    }, 8800);
+  });
+});
+</script>
 
 
 </body>
