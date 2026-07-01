@@ -721,6 +721,117 @@ table tr:hover {
   z-index: 9998;
   transition: opacity 1.2s ease;
 }
+/* STORY POPUP OVERLAY */
+#storyPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;            /* shown via JS */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.3s ease;
+}
+
+/* POPUP WINDOW */
+#storyPopup .modal-content {
+  background: #111;
+  padding: 30px;
+  width: 480px;
+  max-width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,150,255,0.4);
+  border: 1px solid rgba(0,150,255,0.4);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  animation: scaleIn 0.25s ease;
+}
+
+/* TITLE */
+#storyPopup h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  text-align: center;
+  color: #00aaff;
+}
+
+/* DATE SELECTOR */
+#storyDate {
+  width: 100%;
+  padding: 10px;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+/* TEXT EDITOR */
+#storyEditor {
+  width: 100%;
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+/* BUTTONS */
+#storyLoadBtn,
+#storySaveBtn,
+#storyCloseBtn {
+  padding: 10px 18px;
+  margin-top: 15px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#storyLoadBtn {
+  background: #0077ff;
+  color: #fff;
+}
+
+#storySaveBtn {
+  background: #00cc66;
+  color: #fff;
+}
+
+#storyCloseBtn {
+  background: #444;
+  color: #ddd;
+}
+
+/* BUTTON HOVER */
+#storyLoadBtn:hover {
+  background: #3399ff;
+}
+
+#storySaveBtn:hover {
+  background: #00e67a;
+}
+
+#storyCloseBtn:hover {
+  background: #555;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 
 </style>
 </head>
