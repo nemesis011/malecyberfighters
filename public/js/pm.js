@@ -386,6 +386,35 @@ function updateDMListSidebar() {
     });
 }
 
+socket.on("storyApprovalRequest", data => {
+  const { storyId, from } = data;
+
+  const popup = document.createElement("div");
+  popup.className = "modal";
+  popup.innerHTML = `
+    <div class="modal-content">
+      <h2>Story Approval Request</h2>
+      <p>${from} created a story involving your messages.</p>
+      <button id="approveStoryBtn">Approve</button>
+      <button id="denyStoryBtn">Deny</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  document.getElementById("approveStoryBtn").onclick = async () => {
+    await fetch("/api/story/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storyId })
+    });
+    popup.remove();
+  };
+
+  document.getElementById("denyStoryBtn").onclick = () => {
+    popup.remove();
+  };
+});
+
 /* ============================================================
    IMAGE CSS (add to your stylesheet)
 ============================================================ */
