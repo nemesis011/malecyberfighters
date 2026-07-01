@@ -62,6 +62,7 @@ function clearUnread(user) {
 /* PROFILE CARD ------------------------------------------------------- */
 window.updateProfileCard = function(user) {
   const card = document.getElementById('userProfileCard');
+  
   if (!card) return;
 
   /* Logged out ------------------------------------------------------ */
@@ -88,6 +89,7 @@ window.updateProfileCard = function(user) {
   const bio = user.info || 'No bio';
 
 loadStories(user.username);
+loadPendingStories(user.username);
 
 const avatarHtml = user.imageUrl
   ? `<img src="${user.imageUrl}" alt="avatar" class="profile-avatar-img">`
@@ -121,6 +123,7 @@ card.innerHTML = `
     </div>
   </div>
 <div id="profileStories"></div>
+<div id="profilePendingStories"></div>
 
   <button id="btnEditProfile" class="ghost">Edit Profile</button>
   <button id="logoutBtn" class="profile-logout ghost">Logout</button>
@@ -153,6 +156,22 @@ card.innerHTML = `
       }
     });
   }
+
+  document.querySelectorAll(".resendApproval").forEach(btn => {
+  btn.onclick = async () => {
+    const storyId = btn.dataset.id;
+
+    const res = await fetch("/api/story/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storyId })
+    });
+
+    const data = await res.json();
+    if (data.ok) alert("Approval request resent");
+  };
+});
+
 };
 
 async function loadStories(username) {
@@ -176,6 +195,32 @@ async function loadStories(username) {
   });
 }
 
+async function loadPendingStories(username) {
+  const res = await fetch("/api/story/pending?username=" + username);
+  const data = await res.json();
+
+  const box = document.getElementById("profilePendingStories");
+  box.innerHTML = "<h3>Pending Approval</h3>";
+
+  if (!data.stories.length) {
+    box.innerHTML += "<div class='small muted'>No pending stories</div>";
+    return;
+  }
+
+  data.stories.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "story-item pending";
+    div.innerHTML = `
+      <div><strong>${s.partner}</strong></div>
+      <div class="small">${new Date(s.createdAt).toLocaleDateString()}</div>
+      <div class="tiny muted">Waiting for ${s.partner} to approve…</div>
+      <button class="small-btn resendApproval" data-id="${s._id}">
+    Resend Request
+  </button>
+    `;
+    box.appendChild(div);
+  });
+}
 
 /* SESSION UI SYNC ---------------------------------------------------- */
 window.updateUIForSession = function() {
