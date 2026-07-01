@@ -127,6 +127,15 @@ const dmSchema = new mongoose.Schema({
   // image message
   imageUrl: { type: String },
 
+  // system / approval / normal
+  type: { type: String, default: "normal" }, 
+  // values:
+  // "normal"        → regular DM
+  // "image"         → image DM
+  // "storyApproval" → approval request DM
+  // "system"        → system notifications
+
+  // timestamp
   time: { type: Date, default: Date.now }
 });
 
@@ -239,17 +248,28 @@ app.post("/api/story/save", async (req, res) => {
     approved: false
   });
 
-  // Notify partner if online
   const partnerUser = await User.findOne({ username: partner }).lean();
+
+  // If partner is online → real-time popup
   if (partnerUser?.socketId) {
     io.to(partnerUser.socketId).emit("storyApprovalRequest", {
       storyId: saved._id,
       from: owner
     });
+  } else {
+    // If partner is offline → send DM notification
+    await DM.create({
+      from: "SYSTEM",
+      to: partner,
+      text: `${owner} created a story involving your messages. Please approve it.`,
+      type: "storyApproval",
+      time: new Date()
+    });
   }
 
   res.json({ ok: true, storyId: saved._id });
 });
+
 
 app.post("/api/story/approve", async (req, res) => {
   const { storyId } = req.body;
