@@ -222,6 +222,53 @@ async function loadPendingStories(username) {
   });
 }
 
+async function loadRelationships(username) {
+  const res = await fetch("/api/relationship/list?username=" + username);
+  const data = await res.json();
+
+  const box = document.getElementById("profileRelationships");
+  box.innerHTML = "<h3>Relationships</h3>";
+
+  if (!data.relationships.length) {
+    box.innerHTML += "<div class='small muted'>No relationships</div>";
+    return;
+  }
+
+  data.relationships.forEach(r => {
+    const other = r.requester === username ? r.target : r.requester;
+
+    const div = document.createElement("div");
+    div.className = "relationship-item";
+    div.innerHTML = `
+      <strong>${r.type}</strong> with ${other}
+    `;
+    box.appendChild(div);
+  });
+}
+
+async function loadPendingRelationships(username) {
+  const res = await fetch("/api/relationship/pending?username=" + username);
+  const data = await res.json();
+
+  const box = document.getElementById("profilePendingRelationships");
+  box.innerHTML = "<h3>Pending Approval</h3>";
+
+  if (!data.relationships.length) {
+    box.innerHTML += "<div class='small muted'>None pending</div>";
+    return;
+  }
+
+  data.relationships.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "relationship-item pending";
+    div.innerHTML = `
+      <strong>${r.type}</strong> with ${r.target}
+      <div class="tiny muted">Waiting for ${r.target} to approve…</div>
+    `;
+    box.appendChild(div);
+  });
+}
+
 /* SESSION UI SYNC ---------------------------------------------------- */
 window.updateUIForSession = function() {
   const user = getSession();
