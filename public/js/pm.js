@@ -228,9 +228,7 @@ if (m.type === "storyApproval") {
   `;
 }
 if (m.type === "relationshipApproval") {
-  const div = document.createElement("div");
   div.className = "message system";
-
   div.innerHTML = `
     <div class="system-msg">
       ${escapeHtml(m.text)}
