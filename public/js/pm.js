@@ -241,7 +241,6 @@ if (m.type === "relationshipApproval") {
   `;
 
   pmHistory.appendChild(div);
-  continue;
 }
 
     if (m.imageUrl) {
