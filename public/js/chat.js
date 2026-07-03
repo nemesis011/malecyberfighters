@@ -211,7 +211,7 @@ function openUserProfile(username) {
   const user = (window.allUsers || []).find(u => u.username === username);
   if (!user) return;
 
-  // Basic profile fields
+  // Existing profile fields...
   $('vpName').textContent = user.display;
   $('vpUsername').textContent = user.username;
   $('vpBio').textContent = user.info || "No bio provided";
@@ -219,21 +219,38 @@ function openUserProfile(username) {
   $('vpLosses').textContent = user.losses ?? 0;
   $('vpLang').textContent = user.language || "Unknown";
   $('vpAge').textContent = user.age || "Unknown";
-
   $('vpColorBox').style.background = user.color || "#7fd8ff";
+  $('vpAvatar').src = user.imageUrl || "https://via.placeholder.com/120?text=No+Image";
 
-  if (user.imageUrl) {
-    $('vpAvatar').src = user.imageUrl;
-  } else {
-    $('vpAvatar').src = "https://via.placeholder.com/120?text=No+Image";
-  }
-
-  // EXTENDED SECTIONS
+  // Load stories + relationships + timeline
   loadStories(username);
-
+  
   loadRelationships(username);
-
+  
   loadRelationshipTimeline(username);
+
+  // Reset dropdown
+  $('vpRelationshipSelect').value = "";
+
+  // Attach relationship request handler
+  $('vpRelationshipSend').onclick = async () => {
+    const type = $('vpRelationshipSelect').value;
+    if (!type) return alert("Select a relationship first");
+
+    const requester = getSession().username;
+    const target = user.username;
+
+    const res = await fetch("/api/relationship/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requester, target, type })
+    });
+
+    const data = await res.json();
+    if (!data.ok) return alert("Failed to send request");
+
+    alert("Relationship request sent!");
+  };
 
   $('modalViewProfile').style.display = "flex";
 }
