@@ -232,7 +232,7 @@ if (m.type === "relationshipApproval") {
   div.innerHTML = `
     <div class="system-msg">
       ${escapeHtml(m.text)}
-      <button class="small-btn approveRelBtn" data-id="${m.relationshipId}">
+      <button class="small-btn approveRelBtn" data-rel-id="${m.relationshipId}">
         Approve
       </button>
     </div>
@@ -252,7 +252,12 @@ if (m.type === "relationshipApproval") {
 }
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("approveRelBtn")) {
-    const relationshipId = e.target.dataset.id;
+    const relationshipId = e.target.dataset.relId;
+
+    if (!relationshipId) {
+      console.error("Missing relationshipId");
+      return;
+    }
 
     const res = await fetch("/api/relationship/approve", {
       method: "POST",
