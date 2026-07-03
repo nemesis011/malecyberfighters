@@ -239,8 +239,6 @@ if (m.type === "relationshipApproval") {
       </button>
     </div>
   `;
-
-  pmHistory.appendChild(div);
 }
 
     if (m.imageUrl) {
