@@ -916,6 +916,32 @@ table tr:hover {
   font-size: 11px;
   opacity: 0.7;
 }
+.story-item,
+.relationship-item,
+.timeline-item {
+  background: #222;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.story-item.pending,
+.relationship-item.pending {
+  border-left: 4px solid #ffaa00;
+}
+
+.timeline-item {
+  border-left: 4px solid #00aaff;
+}
+
+.timeline-date {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.timeline-desc {
+  font-size: 14px;
+}
 
 </style>
 </head>
@@ -1236,6 +1262,11 @@ table tr:hover {
       <div class="muted">Age</div>
       <div id="vpAge"></div>
     </div>
+<div id="profileStories"></div>
+
+<div id="profileRelationships"></div>
+
+<div id="profileTimeline"></div>
 
   </div>
 </div>
