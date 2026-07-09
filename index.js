@@ -11,7 +11,6 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require("cors");
-app.use(cors({ origin: true, credentials: true }));
 
 const app = express();
 app.set('trust proxy', 1);
@@ -62,6 +61,7 @@ const authLimiter = rateLimit({
 });
 app.use('/api/login', authLimiter);
 app.use('/api/register', authLimiter);
+app.use(cors({ origin: true, credentials: true }));
 
 // ---------- DB ----------
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
