@@ -985,6 +985,28 @@ table tr:hover {
 .system-msg button {
   margin-top: 10px;
 }
+#profileStories .story-item,
+#profileRelationships .relationship-item,
+#profileTimeline .timeline-item {
+  background:#1a1a1a;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:6px;
+  border-left:4px solid #00aaff;
+}
+
+.timeline-item {
+  border-left-color:#ffaa00;
+}
+
+.timeline-date {
+  font-size:11px;
+  opacity:0.7;
+}
+
+.timeline-desc {
+  font-size:14px;
+}
 
 </style>
 </head>
@@ -1248,16 +1270,21 @@ table tr:hover {
     background:#111;
     padding:20px;
     border-radius:12px;
-    width:420px;
+    width:520px;
     max-height:90vh;
     overflow:auto;
   ">
+
+    <!-- HEADER -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <h3 id="vpName" style="margin:0"></h3>
       <button id="vpClose" class="ghost">✕</button>
     </div>
 
-    <div style="text-align:center;margin-bottom:16px">
+    <!-- TOP SECTION: AVATAR + INFO -->
+    <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
+
+      <!-- AVATAR -->
       <img id="vpAvatar" src="" style="
         width:120px;
         height:120px;
@@ -1265,74 +1292,111 @@ table tr:hover {
         object-fit:cover;
         border:1px solid rgba(160,200,255,0.25);
       ">
-    </div>
 
-    <div class="small muted">@<span id="vpUsername"></span></div>
+      <!-- INFO -->
+      <div style="flex:1">
 
-    <div style="margin-top:12px">
-      <div class="muted">Bio:</div>
-      <div id="vpBio" style="margin-top:4px"></div>
-    </div>
+        <div class="small muted">@<span id="vpUsername"></span></div>
+<!-- DM BUTTON -->
+<button id="vpDMButton" class="small-btn" style="
+  margin-top:10px;
+  width:100%;
+">
+  Message User
+</button>
 
-    <div style="margin-top:12px;display:flex;gap:20px">
-      <div>
-        <div class="muted">Wins</div>
-        <div id="vpWins" style="color:var(--accent);font-weight:700"></div>
+        <div style="margin-top:10px">
+          <div class="muted">Bio</div>
+          <div id="vpBio" style="margin-top:4px"></div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:20px">
+          <div>
+            <div class="muted">Wins</div>
+            <div id="vpWins" style="color:var(--accent);font-weight:700"></div>
+          </div>
+          <div>
+            <div class="muted">Losses</div>
+            <div id="vpLosses" style="color:var(--accent);font-weight:700"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Favorite Color</div>
+          <div id="vpColorBox" style="
+            width:40px;
+            height:20px;
+            border-radius:4px;
+            margin-top:4px;
+            border:1px solid rgba(160,200,255,0.25);
+          "></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Language</div>
+          <div id="vpLang"></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Age</div>
+          <div id="vpAge"></div>
+        </div>
+
       </div>
-      <div>
-        <div class="muted">Losses</div>
-        <div id="vpLosses" style="color:var(--accent);font-weight:700"></div>
+    </div>
+
+    <!-- STORIES + RELATIONSHIPS SIDE BY SIDE -->
+    <div style="display:flex;gap:20px;margin-top:20px">
+
+      <div style="flex:1">
+        <h3>Stories</h3>
+        <div id="profileStories"></div>
       </div>
+
+      <div style="flex:1">
+        <h3>Relationships</h3>
+        <div id="profileRelationships"></div>
+      </div>
+
     </div>
 
-    <div style="margin-top:12px">
-      <div class="muted">Favorite Color</div>
-      <div id="vpColorBox" style="
-        width:40px;
-        height:20px;
-        border-radius:4px;
-        margin-top:4px;
-        border:1px solid rgba(160,200,255,0.25);
-      "></div>
+    <!-- TIMELINE -->
+    <div style="margin-top:20px">
+      <h3>Relationship Timeline</h3>
+      <div id="profileTimeline"></div>
     </div>
 
-    <div style="margin-top:12px">
-      <div class="muted">Language</div>
-      <div id="vpLang"></div>
+    <!-- ADD RELATIONSHIP -->
+    <div id="vpRelationshipSection" style="margin-top:25px;padding-top:15px;border-top:1px solid #333">
+      <h3>Add Relationship</h3>
+
+      <select id="vpRelationshipSelect" style="
+        width:100%;
+        padding:8px;
+        margin-top:8px;
+        background:#222;
+        color:#fff;
+        border:1px solid #444;
+        border-radius:6px;
+      ">
+        <option value="">Select relationship…</option>
+        <option value="rival">Rival of</option>
+        <option value="friend">Friend of</option>
+        <option value="opponent">Opponent of</option>
+        <option value="tagteam">Tag team partners with</option>
+        <option value="dating">Dating</option>
+        <option value="married">Married to</option>
+        <option value="sibling">Sibling of</option>
+        <option value="parent">Parent of</option>
+        <option value="owner">Owner of</option>
+      </select>
+
+      <button id="vpRelationshipSend" class="small-btn" style="margin-top:10px;width:100%">
+        Send Request
+      </button>
     </div>
 
-    <div style="margin-top:12px">
-      <div class="muted">Age</div>
-      <div id="vpAge"></div>
-    </div>
-    </div>
-<div id="profileStories"></div>
-
-<div id="profileRelationships"></div>
-
-<div id="profileTimeline"></div>
-<div id="vpRelationshipSection">
-  <h3>Add Relationship</h3>
-
-  <select id="vpRelationshipSelect">
-    <option value="">Select relationship…</option>
-    <option value="rival">Rival of</option>
-    <option value="friend">Friend of</option>
-    <option value="opponent">Opponent of</option>
-    <option value="tagteam">Tag team partners with</option>
-    <option value="dating">Dating</option>
-    <option value="married">Married to</option>
-    <option value="sibling">Sibling of</option>
-    <option value="parent">Parent of</option>
-    <option value="owner">Owner of</option>
-  </select>
-
-  <button id="vpRelationshipSend" class="small-btn">
-    Send Request
-  </button>
-</div>
-
-  
+  </div>
 </div>
 
 <!-- CHAT POPUP -->
