@@ -253,6 +253,10 @@ function openUserProfile(username) {
   };
 
   $('modalViewProfile').style.display = "flex";
+   document.getElementById("vpDMButton").onclick = () => {
+  openPrivateWindow(username);
+};
+
 }
 
 $('vpClose').addEventListener('click', () => {
