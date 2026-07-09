@@ -10,6 +10,8 @@ const fetch = require('node-fetch');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cors = require("cors");
+app.use(cors({ origin: true, credentials: true }));
 
 const app = express();
 app.set('trust proxy', 1);
