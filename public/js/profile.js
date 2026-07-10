@@ -51,9 +51,9 @@ $("btnEditUploadImage").addEventListener("click", async () => {
     const data = await resp.json();
 
     if (data.ok) {
-      editImageUrl = data.url;
-      status.textContent = "Uploaded";
-    } else {
+  editImageUrl = data.imageUrl;
+  status.textContent = "Uploaded";
+} else {
       status.textContent = "Upload failed";
     }
   } catch (e) {
