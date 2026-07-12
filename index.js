@@ -847,9 +847,11 @@ io.on("connection", async (socket) => {
         const translated = await translateText(enriched.text, u.language || "en");
 
         io.to(u.socketId).emit("publicMessage", {
-          ...enriched,
-          text: translated
-        });
+  ...enriched,
+  text: translated,
+  avatar: user?.imageUrl || null
+});
+
       });
 
       const user = await User.findOne({ username: msg.from }).lean();
