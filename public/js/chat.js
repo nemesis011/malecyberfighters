@@ -384,7 +384,7 @@ function renderOnlineList(){
     row.style.justifyContent = 'space-between';
 
     row.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center">
+      <div class="holo-avatar" style="display:flex;gap:8px;align-items:center">
         ${avatar}
         <div>
           <div style="font-weight:700">${u.display}</div>
@@ -420,7 +420,7 @@ function updateDMListSidebar(){
     const div = document.createElement('div');
     div.className = 'dm-sidebar-item';
     div.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center">
+      <div class="holo-avatar" style="display:flex;gap:8px;align-items:center">
         ${avatar}
         <div>
           <div style="font-weight:700">${u.display}</div>
