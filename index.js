@@ -831,42 +831,44 @@ io.on("connection", async (socket) => {
   });
 
   socket.on('publicMessage', async (msg) => {
-    try {
-      const enriched = {
-        from: msg.from,
-        display: msg.display,
-        text: msg.text,
-        time: new Date()
-      };
+  try {
+    const enriched = {
+      from: msg.from,
+      display: msg.display,
+      text: msg.text,
+      time: new Date()
+    };
 
-      await PublicMessage.create(enriched);
+    await PublicMessage.create(enriched);
 
-      const onlineUsers = await User.find({ online: true }).lean();
+    // ⭐ Fetch sender avatar ONCE
+    const sender = await User.findOne({ username: msg.from }).lean();
+    const avatarUrl = sender?.imageUrl || null;
 
-      onlineUsers.forEach(async u => {
-        const translated = await translateText(enriched.text, u.language || "en");
+    const onlineUsers = await User.find({ online: true }).lean();
 
-        io.to(u.socketId).emit("publicMessage", {
-  ...enriched,
-  text: translated,
-  avatar: user?.imageUrl || null
-});
+    // ⭐ Broadcast to all users WITH avatar
+    onlineUsers.forEach(async u => {
+      const translated = await translateText(enriched.text, u.language || "en");
 
+      io.to(u.socketId).emit("publicMessage", {
+        ...enriched,
+        text: translated,
+        avatar: avatarUrl   // ⭐ Now valid
       });
+    });
 
-      const user = await User.findOne({ username: msg.from }).lean();
-      const avatarUrl = user?.imageUrl || null;
+    // ⭐ Send Discord webhook (now works again)
+    await sendDiscordWebhookMessage(
+      msg.display || msg.from,
+      msg.text,
+      avatarUrl
+    );
 
-      await sendDiscordWebhookMessage(
-        msg.display || msg.from,
-        msg.text,
-        avatarUrl
-      );
-
-    } catch (err) {
-      console.error("Error in publicMessage:", err);
-    }
-  });
+  } catch (err) {
+    console.error("Error in publicMessage:", err);
+  }
+});
 
   socket.on("privateMessage", async pm => {
     const sender = await User.findOne({ username: pm.from }).lean();
