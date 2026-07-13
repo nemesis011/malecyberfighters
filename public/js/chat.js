@@ -4,6 +4,17 @@
 window.$ = window.$ || function(id) {
   return document.getElementById(id);
 };
+const REL_COLORS = {
+  rival: "rel-rival",
+  friend: "rel-friend",
+  opponent: "rel-opponent",
+  tagteam: "rel-tagteam",
+  dating: "rel-dating",
+  married: "rel-married",
+  sibling: "rel-sibling",
+  parent: "rel-parent",
+  owner: "rel-owner"
+};
 
 /* ============================================================
    HELPERS
@@ -349,20 +360,31 @@ async function loadRelationshipTimeline(username) {
   const box = document.getElementById("profileTimeline");
   box.innerHTML = "<h3>Relationship Timeline</h3>";
 
-  if (!data.events.length) {
+  // FIX: use data.timeline instead of data.events
+  const events = data.timeline || [];
+
+  if (!events.length) {
     box.innerHTML += "<div class='small muted'>No relationship history</div>";
     return;
   }
 
-  data.events.forEach(e => {
-    const div = document.createElement("div");
-    div.className = "timeline-item";
-    div.innerHTML = `
-      <div class="timeline-date">${new Date(e.createdAt).toLocaleString()}</div>
-      <div class="timeline-desc">${e.description}</div>
-    `;
-    box.appendChild(div);
-  });
+  events.forEach(e => {
+  const div = document.createElement("div");
+
+  const cls = REL_COLORS[e.type] || "rel-friend"; // fallback
+
+  div.className = `timeline-item ${cls}`;
+
+  div.innerHTML = `
+    <div class="timeline-date">${new Date(e.approvedAt).toLocaleString()}</div>
+    <div class="timeline-desc">
+      ${e.type} with <strong>${e.with}</strong>
+    </div>
+  `;
+
+  box.appendChild(div);
+});
+
 }
 
 
