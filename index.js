@@ -78,6 +78,7 @@ const userSchema = new mongoose.Schema({
   color:    { type: String },
   language: { type: String },
   imageUrl: { type: String },
+  blockedUsers: { type: [String], default: [] },
   online:   { type: Boolean, default: false },
   socketId: { type: String, default: null },
   role:     { type: String, default: 'user' },
@@ -453,6 +454,45 @@ app.get("/api/relationship/timeline", async (req, res) => {
   }
 });
 
+app.post("/api/block-user", async (req, res) => {
+  const { username, target } = req.body;
+
+  if (!username || !target) {
+    return res.json({ ok: false, error: "missing_fields" });
+  }
+
+  try {
+    await User.updateOne(
+      { username },
+      { $addToSet: { blockedUsers: target } }
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("block-user error:", err);
+    return res.json({ ok: false, error: "server_error" });
+  }
+});
+
+app.post("/api/unblock-user", async (req, res) => {
+  const { username, target } = req.body;
+
+  if (!username || !target) {
+    return res.json({ ok: false, error: "missing_fields" });
+  }
+
+  try {
+    await User.updateOne(
+      { username },
+      { $pull: { blockedUsers: target } }
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("unblock-user error:", err);
+    return res.json({ ok: false, error: "server_error" });
+  }
+});
 
 app.get("/api/admin/users", async (req, res) => {
   try {
@@ -911,10 +951,14 @@ io.on("connection", async (socket) => {
   }
 });
 
+
   socket.on("privateMessage", async pm => {
     const sender = await User.findOne({ username: pm.from }).lean();
     const receiver = await User.findOne({ username: pm.to }).lean();
-
+if (targetUser.blockedUsers?.includes(pm.from)) {
+    console.log(`DM blocked: ${pm.from} → ${pm.to}`);
+    return; // do NOT deliver the DM
+  }
     if (!receiver) {
       socket.emit("pmError", { reason: "User not found" });
       return;
