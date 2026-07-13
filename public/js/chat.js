@@ -841,6 +841,15 @@ $('closeTOS')?.addEventListener('click', () => {
   $('modalTOS').style.display = 'none';
 });
 
+// open rules
+$('btnRules')?.addEventListener('click', () => {
+  $('modalRules').style.display = 'flex';
+});
+
+// CLOSE rules
+$('closeRules')?.addEventListener('click', () => {
+  $('modalRules').style.display = 'none';
+});
 // OPEN PRIVACY
 $('btnPrivacy')?.addEventListener('click', () => {
   $('modalPrivacy').style.display = 'flex';
