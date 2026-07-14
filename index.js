@@ -570,6 +570,26 @@ app.post("/api/check-availability", async (req, res) => {
   }
 });
 
+app.post("/api/send-dm", async (req, res) => {
+  const { from, to, text } = req.body;
+
+  const dm = await DM.create({
+    from,
+    to,
+    text,
+    time: new Date(),
+    type: "supportReport"
+  });
+
+  const target = await User.findOne({ username: to }).lean();
+
+  if (target?.socketId) {
+    io.to(target.socketId).emit("privateMessage", dm);
+  }
+
+  res.json({ ok: true });
+});
+
 // ---------- API: PUBLIC CHAT HISTORY ----------
 app.get("/api/public-messages", async (req, res) => {
   try {
