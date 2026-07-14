@@ -2381,6 +2381,17 @@ Don't hesitate to contact us if you have any questions.
   <script src="/js/dm-toggle.js"></script>
   <script src="/js/profile.js"></script>
 <script src="/js/landing.js"></script>
+<script>
+  // Mobile redirect
+  (function () {
+    const isMobile =
+      /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = "https://malecyberfighters.base44.app";
+    }
+  })();
+</script>
 
 </body>
 </html>
