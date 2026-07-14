@@ -1223,6 +1223,60 @@ table tr:hover {
   }
 
 }
+@media (max-width: 768px) {
+
+  #supportPopup.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10,10,20,0.95);
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+  }
+
+  #supportPopup.active {
+    display: block;
+  }
+
+  .support-mobile {
+    max-width: 480px;
+    margin: 0 auto;
+    padding-top: 40px;
+  }
+
+  #supportPopup label {
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  #supportPopup input,
+  #supportPopup select,
+  #supportPopup textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1a1a25;
+    color: #fff;
+    margin-top: 6px;
+  }
+
+  #srSubmit {
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    background: #3b9fff;
+    color: #fff;
+  }
+}
 
 </style>
 </head>
@@ -1276,12 +1330,14 @@ table tr:hover {
   DMs <span id="dmBadge" class="badge" style="display:none"></span>
 </button>
     <button id="btnRooms" class="ghost">Rooms</button>
+<button data-nav="support">Support</button>
 
-    <button id="btnAdmin" class="ghost">Admin Panel</button>
+ 
     <div id="legalLinks" style="text-align:center;margin-top:20px">
   <button id="btnTOS" class="ghost small-btn">Terms of Service</button>
   <button id="btnPrivacy" class="ghost small-btn">Privacy Policy</button>
   <button id="btnRules" class="ghost small-btn">Server Rules</button>
+     <button id="btnAdmin" class="ghost">Admin Panel</button>
 </div>
 
   </div>
@@ -1446,6 +1502,48 @@ table tr:hover {
 
       <div id="regError" style="display:none"></div>
     </div>
+  </div>
+</div>
+
+<div id="supportPopup" class="popup">
+  <button class="close-btn" onclick="closePopup('supportPopup')">Close</button>
+
+  <div class="support-mobile">
+
+    <h2>Support Request</h2>
+
+    <div class="pm-section">
+      <label>Type of Report</label>
+      <select id="srType">
+        <option value="user">User Report</option>
+        <option value="issue">App Issue</option>
+      </select>
+    </div>
+
+    <div class="pm-section" id="srUserSection">
+      <label>Who are you reporting?</label>
+      <input id="srUser" placeholder="Username">
+    </div>
+
+    <div class="pm-section">
+      <label>Where did this happen?</label>
+      <input id="srWhere" placeholder="Public chat, DM, room, etc.">
+    </div>
+
+    <div class="pm-section">
+      <label>When did this happen?</label>
+      <input id="srWhen" type="datetime-local">
+    </div>
+
+    <div class="pm-section">
+      <label>Additional Information</label>
+      <textarea id="srInfo" placeholder="Describe what happened..." rows="5"></textarea>
+    </div>
+
+    <div class="pm-buttons">
+      <button id="srSubmit">Submit Report</button>
+    </div>
+
   </div>
 </div>
 
