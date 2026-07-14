@@ -50,7 +50,7 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
-app.get("*", (req, res, next) => {
+app.get("/", (req, res, next) => {
   const ua = req.headers["user-agent"] || "";
 
   const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(ua);
