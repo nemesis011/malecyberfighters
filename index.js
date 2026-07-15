@@ -125,7 +125,7 @@ const dmSchema = new mongoose.Schema({
   // text message (translated)
   text: { type: String },
 
-  // original text (sender’s language)
+  // original text (sender's language)
   originalText: { type: String, required: false },
 
   // image message
@@ -976,10 +976,13 @@ io.on("connection", async (socket) => {
   socket.on("privateMessage", async pm => {
     const sender = await User.findOne({ username: pm.from }).lean();
     const receiver = await User.findOne({ username: pm.to }).lean();
-if (targetUser.blockedUsers?.includes(pm.from)) {
-    console.log(`DM blocked: ${pm.from} → ${pm.to}`);
-    return; // do NOT deliver the DM
-  }
+
+    // ✅ FIXED: Check receiver.blockedUsers instead of undefined targetUser
+    if (receiver?.blockedUsers?.includes(pm.from)) {
+      console.log(`DM blocked: ${pm.from} → ${pm.to}`);
+      return; // do NOT deliver the DM
+    }
+
     if (!receiver) {
       socket.emit("pmError", { reason: "User not found" });
       return;
