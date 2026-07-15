@@ -932,7 +932,7 @@ io.on("connection", async (socket) => {
     io.emit("presence", onlineUsers);
   });
 
-  socket.on('publicMessage', async (msg) => {
+socket.on('publicMessage', async (msg) => {
   try {
     const enriched = {
       from: msg.from,
@@ -947,24 +947,29 @@ io.on("connection", async (socket) => {
     const sender = await User.findOne({ username: msg.from }).lean();
     const avatarUrl = sender?.imageUrl || null;
 
-    const onlineUsers = await User.find({ online: true }).lean();
-
-    // ⭐ Broadcast to all users WITH avatar
-    onlineUsers.forEach(async u => {
-      const translated = await translateText(enriched.text, u.language || "en");
-
-      io.to(u.socketId).emit("publicMessage", {
-        ...enriched,
-        text: translated,
-        avatar: avatarUrl   // ⭐ Now valid
-      });
-    });
-
-    // ⭐ Send Discord webhook (now works again)
+    // ⭐ Send Discord webhook
     await sendDiscordWebhookMessage(
       msg.display || msg.from,
       msg.text,
       avatarUrl
+    );
+
+    // ⭐ Fetch fresh online users right before emitting
+    const onlineUsers = await User.find({ online: true }).lean();
+
+    // ⭐ Use Promise.all to await all translations in parallel
+    await Promise.all(
+      onlineUsers.map(async u => {
+        if (!u.socketId) return; // Skip if no active socket
+        
+        const translated = await translateText(enriched.text, u.language || "en");
+
+        io.to(u.socketId).emit("publicMessage", {
+          ...enriched,
+          text: translated,
+          avatar: avatarUrl
+        });
+      })
     );
 
   } catch (err) {
